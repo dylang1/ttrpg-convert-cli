@@ -1,0 +1,53 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/maven.yml
+      - .github/project.yml
+      - "**.xml"
+      - "*.yml"
+      - "src/**"
+      - "ide-config"
+
+env:
+  JAVA_VERSION: 17
+  GRAALVM_DIST: graalvm-community
+  JAVA_DISTRO: temurin
+  GH_BOT_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+  GH_BOT_NAME: "GitHub Action"
+
+jobs:
+  main-root:
+    runs-on: ubuntu-latest
+    if: "github.ref == 'refs/heads/main' && github.repository == 'ebullient/ttrpg-convert-cli'"
+    steps:
+      - name: Echo a message
+        id: is-main-root
+        run: echo "This is the main branch of 'ebullient/ttrpg-convert-cli'"
+
+  metadata:
+    uses: ebullient/workflows/.github/workflows/java-snap-metadata.yml@main
+
+  build:
+    uses: ebullient/workflows/.github/workflows/java-snap-build.yml@main
+    needs: [metadata]
+    with:
+      artifact: ${{ jobs.metadata.outputs.artifact }}
+      snapshot: ${{ jobs.metadata.outputs.snapshot }}
+    secrets: inherit
+
+  native-build:
+    needs: [main-root, build]
+    uses: ebullient/workflows/.github/workflows/java-snap-native.yml@main
+    secrets: inherit
+
+  snap-release:
+    needs: [main-root, build, native-build]
+    uses: ebullient/workflows/.github/workflows/java-snapshot.yml@main
+    with:
+      artifact: ${{ jobs.metadata.outputs.artifact }}
+      snapshot: ${{ jobs.metadata.outputs.snapshot }}
+    secrets: inherit

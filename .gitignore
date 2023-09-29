@@ -18,7 +18,9 @@ release.properties
 .project
 .classpath
 .settings/
+.secrets
 bin/
+shared-workflows/
 
 # IntelliJ
 .idea
