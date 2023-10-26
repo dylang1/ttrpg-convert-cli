@@ -37,7 +37,7 @@ public class Json2QuteCreature extends Json2QuteBase {
                 Field.alias.replaceTextFromList(rootNode, this),
                 Pf2eCreature.description.replaceTextFrom(rootNode, this),
                 //getPerception(),
-                level.orElse(null));
+                level.orElse(null), perception, senses, languages, abilityScores, skill, items, speed, attacks, spellcastings, abilities, defenses);
     }
 
     private String getPerception() {
