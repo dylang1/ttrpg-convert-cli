@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import dev.ebullient.convert.io.Tui;
@@ -424,10 +425,17 @@ public interface Pf2eTypeReader extends JsonSource {
     class Speed {
         public Integer walk;
         public Integer climb;
+        @JsonProperty("ice climb")
+        public Integer iceClimb;
+        @JsonProperty("ice burrow")
+        public Integer iceBurrow;
+        @JsonProperty("water glide")
+        public Integer waterGlide;
         public Integer fly;
         public Integer burrow;
         public Integer swim;
         public Integer dimensional;
+        public List<String> abilities;
         public String speedNote;
 
         public String speedToString(Pf2eTypeReader convert) {
@@ -435,14 +443,26 @@ public interface Pf2eTypeReader extends JsonSource {
             if (climb != null) {
                 parts.add("climb " + climb + " feet");
             }
+            if (iceClimb != null) {
+                parts.add("ice climb " + iceClimb + " feet");
+            }
             if (fly != null) {
                 parts.add("fly " + fly + " feet");
+            }
+            if (waterGlide != null) {
+                parts.add("water glide " + waterGlide + " feet");
             }
             if (burrow != null) {
                 parts.add("burrow " + burrow + " feet");
             }
+            if (iceBurrow != null) {
+                parts.add("ice burrow " + iceBurrow + " feet");
+            }
             if (swim != null) {
                 parts.add("swim " + swim + " feet");
+            }
+            if( abilities != null && !abilities.isEmpty()) {
+                parts.add(String.join(",",abilities));
             }
             return String.format("%s%s%s",
                     walk == null ? "no land Speed" : "Speed " + walk + " feet",

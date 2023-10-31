@@ -41,14 +41,15 @@ public class Pf2eDataConvertTest {
             List<String> args = new ArrayList<>(List.of("--index", "--debug",
                     "-s", "ALL",
                     "-o", allIndex.toString(),
-                    "-g", "pf2e",
-                    TestUtils.TOOLS_PATH_PF2E.toString()));
-
-            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("adventure"))
-                    .stream()
-                    .filter(x -> !x.endsWith("-id.json"))
-                    .toList());
-            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("book")));
+                    "-g", "pf2e"
+                    ));
+//                    TestUtils.TOOLS_PATH_PF2E.toString()));
+args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("bestiary")).stream().filter(x-> x.contains("creatures-b2.json")).toList());
+//            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("adventure"))
+//                    .stream()
+//                    .filter(x -> !x.endsWith("-id.json"))
+//                    .toList());
+//            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("book")));
 
             LaunchResult result = launcher.launch(args.toArray(new String[0]));
             assertThat(result.exitCode())

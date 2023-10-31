@@ -79,6 +79,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
 
         Pf2eIndexType.adventure.withArrayFrom(node, this::addToIndex);
         Pf2eIndexType.book.withArrayFrom(node, this::addToIndex);
+        Pf2eIndexType.creature.withArrayFrom(node,this::addToIndex);
 
         addDataToIndex(Pf2eIndexType.data.getFrom(node), filename);
 

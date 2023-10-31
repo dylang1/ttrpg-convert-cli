@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import dev.ebullient.convert.config.CompendiumConfig;
 import dev.ebullient.convert.io.Tui;
 import dev.ebullient.convert.tools.JsonNodeReader;
@@ -270,7 +271,7 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
                 // "Skill tags; {@skill Athletics}, {@skill Lore}, {@skill Perception}",
                 // {@skill Lore||Farming Lore}
                 String[] parts = match.split("\\|");
-                String linkText = parts.length > 1 ? parts[2] : parts[0];
+                String linkText = parts.length > 1 ? parts[1] : parts[0];
                 return linkifyRules(Pf2eIndexType.skill, linkText, "skills", toTitleCase(parts[0]));
             case classtype:
                 return linkifyClass(match);
@@ -281,6 +282,7 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
             case trait:
                 return linkifyTrait(match);
             default:
+                //tui().debugf("TODO Unsupported Linking found: %s for data %s",targetType.toString(), match);
                 break;
         }
 
@@ -455,4 +457,25 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
         tui().debugf("TODO CLASS FEATURE found: %s", match);
         return match;
     }
+
+    default String joinAndReplace(JsonNode jsonSource, String field) {
+        JsonNode node = jsonSource.get(field);
+        if (node == null || node.isNull()) {
+            return "";
+        } else if (node.isTextual()) {
+            return node.asText();
+        } else if (node.isObject()) {
+            throw new IllegalArgumentException(
+                String.format("Unexpected object node (expected array): %s (referenced from %s)", node,
+                    getSources()));
+        }
+        return joinAndReplace((ArrayNode) node);
+    }
+
+    default String joinAndReplace(ArrayNode array) {
+        List<String> list = new ArrayList<>();
+        array.forEach(v -> list.add(replaceText(v.asText())));
+        return String.join(", ", list);
+    }
+
 }

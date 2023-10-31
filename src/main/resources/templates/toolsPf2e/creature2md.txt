@@ -1,0 +1,80 @@
+---
+obsidianUIMode: preview
+noteType: pf2eMonster
+{#if resource.tags }
+tags:
+{#for tag in resource.tags}
+- {tag}
+{/for}
+{/if}
+aliases: ["{resource.name}"]
+name: {resource.name}
+level: {resource.level}
+---
+>[!statblock-pf2e] {resource.name} <span class="creature"> creature {resource.level}</span>
+>{#if resource.tags}{#for tag in resource.tags}{tag}{/for}{/if}
+>
+{#if resource.perception }
+>**Perception** {resource.perception}{#if resource.senses}{#for sense in resource.senses}{sense}, {/for}{/if}
+{/if}
+{#if resource.languages }
+>**Languages** {resource.languages}  
+{/if}
+{#if resource.skills}
+> **Skills** {resource.skills}
+{/if}
+{#if resource.abilityMods}
+> {resource.abilityMods}
+{/if}
+> ---
+{#if resource.defenses}
+> {resource.defenses}
+{/if}
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+# {resource.name} *{resource.level}*
+
+
+{#if resource.description }
+{resource.description}
+{/if}
+|STR|DEX|CON|INT|WIS|CHA|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|{resource.abilityMods}|
+
+{#if resource.perception }
+- **Perception** {resource.perception}  
+{/if}
+{#if resource.topAbilities }
+
+{#each resource.topAbilities}{it}
+{/each}{/if}
+{#if resource.midAbilities }
+
+{#each resource.midAbilities}{it}
+{/each}{/if}
+{#if resource.botAbilities }
+
+{#each resource.botAbilities}{it}
+{/each}{/if}
+
+{#if resource.defenses }
+
+{resource.defenses}
+{/if}{#if resource.attacks }
+
+{#each resource.attacks}{it}
+{/each}{/if}
+
+*Source: {resource.source}*
