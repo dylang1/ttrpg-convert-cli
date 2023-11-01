@@ -56,10 +56,18 @@ public class Json2QuteCreature extends Json2QuteBase {
 
     private String buildLanguages() {
         JsonNode languageNode = Pf2eCreature.languages.getFrom(rootNode);
-        String languages = Pf2eCreature.languages.joinAndReplace(languageNode, this,",");
-        if(languageNode.hasNonNull("notes")) {
-            ArrayNode an = languageNode.get("notes").forEach();
+        if(languageNode == null){
+            return null;
         }
+            String languages = Pf2eCreature.languages.joinAndReplace(languageNode, this, ",");
+            StringBuilder sb = new StringBuilder(languages);
+            if (languageNode.hasNonNull("notes")) {
+                languageNode.get("notes").forEach(noteNode -> {
+                    sb.append(" (");
+                    sb.append(noteNode.asText());
+                    sb.append(")");
+                });
+            }
         return languages;
     }
 
