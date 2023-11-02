@@ -49,7 +49,7 @@ args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("bestiary")
 //                    .stream()
 //                    .filter(x -> !x.endsWith("-id.json"))
 //                    .toList());
-//            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("book")));
+            //args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("book")));
 
             LaunchResult result = launcher.launch(args.toArray(new String[0]));
             assertThat(result.exitCode())

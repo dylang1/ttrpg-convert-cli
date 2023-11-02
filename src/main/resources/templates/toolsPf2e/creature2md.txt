@@ -30,51 +30,24 @@ level: {resource.level}
 {#if resource.defenses}
 > {resource.defenses}
 {/if}
-
- 
-
-
-
-
-
-
-
-
-
-
-
-# {resource.name} *{resource.level}*
-
-
-{#if resource.description }
-{resource.description}
+> ---
+{#if resource.speed}
+> {resource.speed}
 {/if}
-|STR|DEX|CON|INT|WIS|CHA|
-|:---:|:---:|:---:|:---:|:---:|:---:|
-|{resource.abilityMods}|
-
-{#if resource.perception }
-- **Perception** {resource.perception}  
-{/if}
+{#if resource.attacks }
+{#each resource.attacks}>{it}
+{/each}{/if}
 {#if resource.topAbilities }
-
-{#each resource.topAbilities}{it}
+{#each resource.topAbilities}>{it}
 {/each}{/if}
 {#if resource.midAbilities }
-
-{#each resource.midAbilities}{it}
+{#each resource.midAbilities}>{it}
 {/each}{/if}
 {#if resource.botAbilities }
-
-{#each resource.botAbilities}{it}
+{#each resource.botAbilities}>{it}
 {/each}{/if}
 
-{#if resource.defenses }
-
-{resource.defenses}
-{/if}{#if resource.attacks }
-
-{#each resource.attacks}{it}
+{#if resource.spellcastings }
+{#each resource.spellcastings}>{it}
 {/each}{/if}
-
-*Source: {resource.source}*
+> <span class="sourcebook">*{resource.source}*

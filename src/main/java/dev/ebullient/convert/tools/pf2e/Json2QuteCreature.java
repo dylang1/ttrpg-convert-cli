@@ -59,12 +59,19 @@ public class Json2QuteCreature extends Json2QuteBase {
         if(languageNode == null){
             return null;
         }
-            String languages = Pf2eCreature.languages.joinAndReplace(languageNode, this, ",");
+            String languages = Pf2eCreature.languages.joinAndReplace(languageNode, this, ", ");
             StringBuilder sb = new StringBuilder(languages);
             if (languageNode.hasNonNull("notes")) {
                 languageNode.get("notes").forEach(noteNode -> {
                     sb.append(" (");
                     sb.append(noteNode.asText());
+                    sb.append(")");
+                });
+            }
+            if(languageNode.hasNonNull("abilities")){
+                languageNode.get("abilities").forEach( abNote-> {
+                    sb.append(" (");
+                    sb.append(abNote.asText());
                     sb.append(")");
                 });
             }

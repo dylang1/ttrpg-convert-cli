@@ -1,0 +1,7 @@
+Fix Null on abilities 
+Fix defenses not showing for creatures properly 
+add rendering of spellcasting 
+add support for statblock plugin 
+add javadoc to explain what each field etc does 
+Get whats done reviewed first before this though 
+Parse rule books as thats notdone 

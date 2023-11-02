@@ -465,7 +465,7 @@ public interface Pf2eTypeReader extends JsonSource {
                 parts.add(String.join(",",abilities));
             }
             return String.format("%s%s%s",
-                    walk == null ? "no land Speed" : "Speed " + walk + " feet",
+                    walk == null ? "no land Speed" : "***Speed*** " + walk + " feet",
                     (walk == null || parts.isEmpty()) ? "" : ", ",
                     convert.join(", ", parts));
         }

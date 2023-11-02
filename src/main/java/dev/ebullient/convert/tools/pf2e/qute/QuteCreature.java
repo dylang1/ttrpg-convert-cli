@@ -96,10 +96,71 @@ public class QuteCreature extends Pf2eQuteBase {
     public Collection<String> attacks(){
         List<String> attackString = new ArrayList<>();
         for (QuteInlineAttack attack: attacks ) {
-            StringBuilder sb = new StringBuilder();
-            //sb.append()
+            String sb = "***" +
+                attack.meleeOrRanged +
+                "*** " +
+                attack.activity +
+                attack.getName() +
+                attack.traits +
+                "**Damage** " +
+                attack.damage;
+            attackString.add(sb);
 
         }
         return attackString;
+    }
+    public Collection<String> topAbilities(){
+        List<String> abilityString = new ArrayList<>();
+        for(QuteAbility ability : topAbilities){
+            String ab = "*** " +
+                ability.getName() +
+                " ***" +
+                (ability.getHasActivity()? ability.activity:"")+
+                ability.getBareTraitList()+
+                ability.cost+
+                ability.frequency+
+                ability.trigger+
+                ability.requirements+
+                ability.text+
+                ability.note;
+            abilityString.add(ab);
+        }
+        return abilityString;
+    }
+    public Collection<String> midAbilities(){
+        List<String> abilityString = new ArrayList<>();
+        for(QuteAbility ability : midAbilities){
+            String ab = "*** " +
+                ability.getName() +
+                " ***" +
+                (ability.getHasActivity()? ability.activity:"")+
+                ability.getBareTraitList()+
+                ability.cost+
+                ability.frequency+
+                ability.trigger+
+                ability.requirements+
+                ability.text+
+                ability.note;
+            abilityString.add(ab);
+        }
+        return abilityString;
+    }
+    public Collection<String> botAbilities(){
+        List<String> abilityString = new ArrayList<>();
+        for(QuteAbility ability : botAbilities){
+            String ab = "*** " +
+                ability.getName() +
+                " ***" +
+                (ability.getHasActivity()? ability.activity:"")+
+                ability.getBareTraitList()+
+                ability.cost+
+                ability.frequency+
+                ability.trigger+
+                ability.requirements+
+                ability.text+
+                ability.note;
+            abilityString.add(ab);
+        }
+        return abilityString;
     }
 }
