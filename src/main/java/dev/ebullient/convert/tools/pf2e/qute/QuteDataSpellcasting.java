@@ -3,7 +3,6 @@ package dev.ebullient.convert.tools.pf2e.qute;
 import dev.ebullient.convert.qute.QuteUtil;
 import io.quarkus.qute.TemplateData;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -14,10 +13,12 @@ public class QuteDataSpellcasting implements QuteUtil {
     public String tradition;
     public int DC;
     public int FP;
-    /** Map of spell level and spells(links) with count of castings appended */
-    public Map<String,List<String>> spells;
+    /**
+     * Map of spell level and spells(links) with count of castings appended
+     */
+    public Map<String, List<String>> spells;
 
-    public QuteDataSpellcasting(String name, String type, String tradition, int DC, int FP, Map<String,List<String>> spells) {
+    public QuteDataSpellcasting(String name, String type, String tradition, int DC, int FP, Map<String, List<String>> spells) {
         this.name = name;
         this.type = type;
         this.tradition = tradition;
@@ -31,7 +32,29 @@ public class QuteDataSpellcasting implements QuteUtil {
 
     @Override
     public String toString() {
-        return "QuteSpellcasting{" + "name='" + name + '\'' + ", type='" + type + '\'' + ", tradition='" + tradition + '\'' + ", DC=" + DC + ", FP=" + FP + ", spells=" + spells + '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append(" ***").append(tradition).append(" ").append(type).append(" Spellcasting ***")
+            .append("DC ").append(DC).append("; ");
+        if(FP !=0){
+            sb.append("FP ").append(FP).append("; ");
+        }
+        sb.append(formatSpells(spells));
+        return sb.toString();
+    }
+
+    private String formatSpells(Map<String, List<String>> spells) {
+        StringBuilder s = new StringBuilder();
+        for (Map.Entry<String, List<String>> entry : spells.entrySet()) {
+            String key = entry.getKey();
+            List<String> value = entry.getValue();
+            s.append("** ")
+                .append(key)
+                .append(" **").append(" ")
+                .append(String.join(" ,",value))
+                .append(";");
+        }
+
+        return s.toString();
     }
 
     public QuteDataSpellcasting setName(String name) {
@@ -59,7 +82,7 @@ public class QuteDataSpellcasting implements QuteUtil {
         return this;
     }
 
-    public QuteDataSpellcasting setSpells(Map<String,List<String>> spells) {
+    public QuteDataSpellcasting setSpells(Map<String, List<String>> spells) {
         this.spells = spells;
         return this;
     }

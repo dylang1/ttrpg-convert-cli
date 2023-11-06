@@ -1,7 +1,8 @@
-Fix Null on abilities 
-Fix defenses not showing for creatures properly 
-add rendering of spellcasting 
+fix abilities getting added misaligned - make sure not to break hazards
+Change rendering of attacks 
+fix embedded traits
+add support for X lore
 add support for statblock plugin 
 add javadoc to explain what each field etc does 
-Get whats done reviewed first before this though 
-Parse rule books as thats notdone 
+hook up tests
+

@@ -203,6 +203,13 @@ public interface Pf2eTypeReader extends JsonSource {
             // First pass: for hazards. TODO: creatures
             JsonNode btValueNode = bt.getFromOrEmptyObjectNode(source);
             JsonNode hpValueNode = hp.getFromOrEmptyObjectNode(source);
+            if(hpValueNode.isArray()){
+                if(hpValueNode.size()>1){
+                    convert.tui().debugf("hpArray size %s",hpValueNode.asText());
+                }
+                hpValueNode=hpValueNode.get(0);
+
+            }
             Map<String, String> hpNotes = notes.getMapOfStrings(hpValueNode, convert.tui());
             JsonNode hardValueNode = hardness.getFromOrEmptyObjectNode(source);
             Map<String, String> hardNotes = notes.getMapOfStrings(hardValueNode, convert.tui());
@@ -212,17 +219,20 @@ public interface Pf2eTypeReader extends JsonSource {
             hpValueNode.fieldNames().forEachRemaining(keys::add);
             btValueNode.fieldNames().forEachRemaining(keys::add);
             hardValueNode.fieldNames().forEachRemaining(keys::add);
-            keys.removeIf(k -> k.equalsIgnoreCase("notes"));
+            keys.removeIf(k -> k.equalsIgnoreCase("notes") || k.equalsIgnoreCase("abilities"));
 
             List<QuteDataHpHardness> items = new ArrayList<>();
             for (String k : keys) {
                 QuteDataHpHardness qhp = new QuteDataHpHardness();
-                qhp.name = k.equals("std") ? "" : k;
+                qhp.name = k.equals("std") ? "" : k.equals("hp") ? "":k;
                 qhp.hardnessNotes = convert.replaceText(hardNotes.get(k));
                 qhp.hpNotes = convert.replaceText(hpNotes.get(k));
                 qhp.hardnessValue = convert.replaceText(hardValueNode.get(k));
                 qhp.hpValue = convert.replaceText(hpValueNode.get(k));
                 qhp.brokenThreshold = convert.replaceText(btValueNode.get(k));
+                if(hpValueNode.has("abilities")) {
+                    qhp.hpAbilities = convert.joinAndReplace(hpValueNode.get("abilities"));
+                }
                 items.add(qhp);
             }
             items.sort(Comparator.comparing(a -> a.name));

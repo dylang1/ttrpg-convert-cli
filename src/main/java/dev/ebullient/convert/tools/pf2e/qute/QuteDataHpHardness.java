@@ -17,6 +17,7 @@ public class QuteDataHpHardness implements QuteUtil {
     public String hardnessNotes;
     public String hardnessValue;
     public String brokenThreshold;
+    public String hpAbilities;
 
     public String toString() {
         String n = isPresent(name) ? (name.trim() + " ") : "";
@@ -41,7 +42,8 @@ public class QuteDataHpHardness implements QuteUtil {
         if (isPresent(hpNotes)) {
             hpNotePart = " " + hpNotes;
         }
+
         return String.join(hasHardnessNotes ? "; " : ", ", hardParts)
-                + btPart + hpNotePart;
+                + btPart + hpNotePart+ (isPresent(hpAbilities) ? " "+hpAbilities : "");
     }
 }

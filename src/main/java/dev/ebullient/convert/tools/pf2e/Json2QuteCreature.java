@@ -56,30 +56,33 @@ public class Json2QuteCreature extends Json2QuteBase {
 
     private String buildLanguages() {
         JsonNode languageNode = Pf2eCreature.languages.getFrom(rootNode);
-        if(languageNode == null){
+        if (languageNode == null) {
             return null;
         }
-            String languages = Pf2eCreature.languages.joinAndReplace(languageNode, this, ", ");
-            StringBuilder sb = new StringBuilder(languages);
-            if (languageNode.hasNonNull("notes")) {
-                languageNode.get("notes").forEach(noteNode -> {
-                    sb.append(" (");
-                    sb.append(noteNode.asText());
-                    sb.append(")");
-                });
-            }
-            if(languageNode.hasNonNull("abilities")){
-                languageNode.get("abilities").forEach( abNote-> {
-                    sb.append(" (");
-                    sb.append(abNote.asText());
-                    sb.append(")");
-                });
-            }
-        return languages;
+        StringBuilder sb = new StringBuilder();
+
+        if(languageNode.hasNonNull("languages")) {
+            languageNode.get("languages").forEach(l -> sb.append(toTitleCase(l.asText())).append(", "));
+        }
+        if (languageNode.hasNonNull("notes")) {
+            languageNode.get("notes").forEach(noteNode -> {
+                sb.append(" (");
+                sb.append(replaceText(noteNode.asText()));
+                sb.append(")");
+            });
+        }
+        if (languageNode.hasNonNull("abilities")) {
+            languageNode.get("abilities").forEach(abNote -> {
+                sb.append(" (");
+                sb.append(replaceText(abNote.asText()));
+                sb.append(")");
+            });
+        }
+        return sb.toString();
     }
 
     private Collection<QuteDataSpellcasting> buildSpellcasting() {
-        List<QuteDataSpellcasting> spellcastings  =new ArrayList<>();
+        List<QuteDataSpellcasting> spellcastings = new ArrayList<>();
         Pf2eCreature.spellcasting.getFrom(rootNode);
 
         JsonNode array = Pf2eCreature.spellcasting.getFrom(rootNode);
@@ -91,25 +94,24 @@ public class Json2QuteCreature extends Json2QuteBase {
         }
         array.forEach(node -> {
             QuteDataSpellcasting spellcasting = new QuteDataSpellcasting();
-            spellcasting.name = SourceField.name.replaceTextFrom(node,this);
-            if(node.has("tradition")) {
-                spellcasting.tradition = node.get("tradition").asText();
+            spellcasting.name = SourceField.name.replaceTextFrom(node, this);
+            if (node.has("tradition")) {
+                spellcasting.tradition = toTitleCase(node.get("tradition").asText());
             }
             spellcasting.type = node.get("type").asText(null);
-            if(node.has("DC")) {
+            if (node.has("DC")) {
                 spellcasting.DC = node.get("DC").asInt();
             }
-            if(node.has("fp")) {
+            if (node.has("fp")) {
                 spellcasting.FP = node.get("fp").asInt();
             }
             spellcasting.spells = new TreeMap<>();
             node.get("entry").fields().forEachRemaining(
                 f -> {
-
-                    if(f.getKey().equals("constant")){
+                    if (f.getKey().equals("constant")) {
                         f.getValue().fields().forEachRemaining(
-                            c -> spellcasting.spells.put("Constant" + "("+numToSpellLevel(f)+")",getSpells(c.getValue().get("spells"))));
-                    }else {
+                            c -> spellcasting.spells.put("Constant" + "(" + numToSpellLevel(f) + ")", getSpells(c.getValue().get("spells"))));
+                    } else {
                         spellcasting.spells.put(numToSpellLevel(f), getSpells(f.getValue().get("spells")));
                     }
                 });
@@ -118,58 +120,62 @@ public class Json2QuteCreature extends Json2QuteBase {
         });
         return spellcastings;
     }
-    private String numToSpellLevel(Map.Entry<String,JsonNode> map){
+
+    private String numToSpellLevel(Map.Entry<String, JsonNode> map) {
         return switch (map.getKey()) {
             case "0" -> String.format("Cantrips (%s)", map.getValue().get("level").asText());
             default -> getOrdinalForm(map.getKey());
         };
     }
-    private List<String> getSpells(JsonNode node){
+
+    private List<String> getSpells(JsonNode node) {
         if (node == null) {
             tui().errorf("Null spells from %s", sources.getKey());
             return List.of();
         }
         List<String> spells = new ArrayList<>();
         node.forEach(s -> {
-            String spellName = linkify(Pf2eIndexType.spell,s.get("name").asText());
-            if(s.has("amount")){
-                spellName+= " ("+s.get("amount").asText()+");";
+            String spellName = linkify(Pf2eIndexType.spell, s.get("name").asText());
+            if (s.has("amount")) {
+                spellName += " (" + s.get("amount").asText() + ");";
             }
-            if(s.has("notes")){
+            if (s.has("notes")) {
                 List<String> notes = new ArrayList<>();
                 s.get("notes").forEach(
                     note -> notes.add(note.asText())
                 );
-                spellName+= String.join(",",notes)+";";
+                spellName += String.join(",", notes) + ";";
             }
             spells.add(spellName);
         });
         return spells;
     }
 
-    private String buildSpeed(){
-            Speed speed = Json2QuteCreature.Pf2eCreature.speed.fieldFromTo(rootNode, Speed.class, tui());
-            if (speed != null) {
-                return speed.speedToString(this);
-            }
+    private String buildSpeed() {
+        Speed speed = Json2QuteCreature.Pf2eCreature.speed.fieldFromTo(rootNode, Speed.class, tui());
+        if (speed != null) {
+            return speed.speedToString(this);
+        }
         return null;
     }
-    private Optional<Integer> buildPerception(){
+
+    private Optional<Integer> buildPerception() {
         Optional<Integer> perception = Optional.of(0);
-        if(Pf2eCreature.perception.getFieldFrom(rootNode, () -> "std") !=null){
+        if (Pf2eCreature.perception.getFieldFrom(rootNode, () -> "std") != null) {
             perception = Optional.of(Pf2eCreature.perception.getFieldFrom(rootNode, () -> "std").asInt());
         }
         return perception;
     }
+
     private Collection<String> buildItems() {
         List<String> items = new ArrayList<>();
-            Json2QuteCreature.Pf2eCreature.items.getListOfStrings(rootNode, tui()).forEach(x -> items.add(replaceText(x)));
-    return items;
+        Json2QuteCreature.Pf2eCreature.items.getListOfStrings(rootNode, tui()).forEach(x -> items.add(replaceText(x)));
+        return items;
     }
 
     private Collection<QuteDataSenses> buildSenses() {
         Collection<QuteDataSenses> senses = new ArrayList<>();
-        Pf2eCreature.senses.withArrayFrom(rootNode).forEach(a -> senses.add(new QuteDataSenses(a.path("name").asText(), linkify(Pf2eIndexType.ability,a.path("type").asText(null)), a.path("range").asText(null))));
+        Pf2eCreature.senses.withArrayFrom(rootNode).forEach(a -> senses.add(new QuteDataSenses(a.path("name").asText(), linkify(Pf2eIndexType.ability, a.path("type").asText(null)), a.path("range").asText(null))));
         return senses;
     }
 
@@ -181,9 +187,9 @@ public class Json2QuteCreature extends Json2QuteBase {
 
     private List<QuteAbility> buildAbilities(String region) {
         JsonNode node = Pf2eCreature.abilities.getFrom(rootNode);
-        List<QuteAbility> abilities= new ArrayList<>();
-        if(node != null && node.has(region)){
-            node.get(region).forEach(x-> abilities.add(Pf2eTypeAbility.createAbility(x,this,false)));
+        List<QuteAbility> abilities = new ArrayList<>();
+        if (node != null && node.has(region)) {
+            node.get(region).forEach(x -> abilities.add(Pf2eTypeAbility.createAbility(x, this, false)));
         }
         return abilities;
 
@@ -191,7 +197,7 @@ public class Json2QuteCreature extends Json2QuteBase {
 
     private QuteDataAbilityMods buildAbilityMods() {
         Map<String, Integer> aM = new HashMap<>();
-        if(Pf2eCreature.abilityMods.existsIn(rootNode)){
+        if (Pf2eCreature.abilityMods.existsIn(rootNode)) {
             aM = Pf2eCreature.abilityMods.fieldFromTo(rootNode, HashMap.class, tui());
         }
         QuteDataAbilityMods abilityMods = new QuteDataAbilityMods();
@@ -205,15 +211,15 @@ public class Json2QuteCreature extends Json2QuteBase {
     }
 
     private QuteDataSkills buildSkills() {
-        Map<String, Map<String, Integer>> aM = new HashMap<>();
-        if(Pf2eCreature.skills.existsIn(rootNode)){
+        Map<String, Map<String, String>> aM = new HashMap<>();
+        if (Pf2eCreature.skills.existsIn(rootNode)) {
             aM = Json2QuteCreature.Pf2eCreature.skills.fieldFromTo(rootNode, Map.class, tui());
         }
-        List<String> skillList = List.of("arcana","athletics","acrobatics","crafting","diplomacy","survival","intimidation","deception","lore","medicine","nature","occultism","religion","performance","society","stealth","thievery");
-        if(!aM.keySet().stream().allMatch(s -> skillList.contains(s))){
+        List<String> skillList = List.of("arcana", "athletics", "acrobatics", "crafting", "diplomacy", "survival", "intimidation", "deception", "lore", "medicine", "nature", "occultism", "religion", "performance", "society", "stealth", "thievery");
+        if (!skillList.containsAll(aM.keySet())) {
             Set<String> missingKeys = aM.keySet();
             skillList.forEach(missingKeys::remove);
-            missingKeys.forEach(s ->  tui().debugf("TODO: Unsupported Skill: %s",  s));
+            missingKeys.forEach(s -> tui().debugf("TODO: Unsupported Skill: %s", s));
 
         }
         QuteDataSkills skills = new QuteDataSkills();
@@ -236,6 +242,7 @@ public class Json2QuteCreature extends Json2QuteBase {
             .setThievery(aM.get("thievery"));
         return skills;
     }
+
     private QuteDataDefenses buildDefenses() {
         JsonNode defenseNode = Json2QuteHazard.Pf2eHazard.defenses.getFrom(rootNode);
         if (defenseNode == null) {
@@ -243,6 +250,7 @@ public class Json2QuteCreature extends Json2QuteBase {
         }
         return Pf2eDefenses.createInlineDefenses(defenseNode, this);
     }
+
     enum Pf2eCreature implements JsonNodeReader {
         abilities, abilityMods, alignment, attacks, defenses, description, hasImages, inflicts, isNpc, items, languages, level, perception, rarity, rituals, senses, size, skills, speed, spellcasting, traits,
     }

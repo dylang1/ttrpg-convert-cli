@@ -15,7 +15,7 @@ level: {resource.level}
 >{#if resource.tags}{#for tag in resource.tags}{tag}{/for}{/if}
 >
 {#if resource.perception }
->**Perception** {resource.perception}{#if resource.senses}{#for sense in resource.senses}{sense}, {/for}{/if}
+>**Perception** {resource.perception};{#if resource.senses}{#for sense in resource.senses}{sense}, {/for}{/if}
 {/if}
 {#if resource.languages }
 >**Languages** {resource.languages}  
@@ -30,6 +30,9 @@ level: {resource.level}
 {#if resource.defenses}
 > {resource.defenses}
 {/if}
+{#if resource.midAbilities }
+{#each resource.midAbilities}> {it}
+{/each}{/if}
 > ---
 {#if resource.speed}
 > {resource.speed}
@@ -37,17 +40,15 @@ level: {resource.level}
 {#if resource.attacks }
 {#each resource.attacks}>{it}
 {/each}{/if}
+{#if resource.spellcastings }
+{#each resource.spellcastings}>{it}
+{/each}{/if}
 {#if resource.topAbilities }
 {#each resource.topAbilities}>{it}
-{/each}{/if}
-{#if resource.midAbilities }
-{#each resource.midAbilities}>{it}
 {/each}{/if}
 {#if resource.botAbilities }
 {#each resource.botAbilities}>{it}
 {/each}{/if}
 
-{#if resource.spellcastings }
-{#each resource.spellcastings}>{it}
-{/each}{/if}
+
 > <span class="sourcebook">*{resource.source}*

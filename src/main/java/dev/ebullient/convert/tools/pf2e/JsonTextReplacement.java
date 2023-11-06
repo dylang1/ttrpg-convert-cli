@@ -472,9 +472,14 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
         return joinAndReplace((ArrayNode) node);
     }
 
-    default String joinAndReplace(ArrayNode array) {
+    default String joinAndReplace(JsonNode node) {
+        if(!node.isArray()){
+            throw new IllegalArgumentException(
+                String.format("Unexpected object node (expected array): %s (referenced from %s)", node,
+                    getSources()));
+        }
         List<String> list = new ArrayList<>();
-        array.forEach(v -> list.add(replaceText(v.asText())));
+        node.forEach(v -> list.add(replaceText(v.asText())));
         return String.join(", ", list);
     }
 
