@@ -271,7 +271,7 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
                 // "Skill tags; {@skill Athletics}, {@skill Lore}, {@skill Perception}",
                 // {@skill Lore||Farming Lore}
                 String[] parts = match.split("\\|");
-                String linkText = parts.length > 1 ? parts[1] : parts[0];
+                String linkText = parts.length > 2 ? parts[2] : parts[0];
                 return linkifyRules(Pf2eIndexType.skill, linkText, "skills", toTitleCase(parts[0]));
             case classtype:
                 return linkifyClass(match);

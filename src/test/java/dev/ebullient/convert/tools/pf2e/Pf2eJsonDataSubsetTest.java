@@ -47,7 +47,10 @@ public class Pf2eJsonDataSubsetTest {
     public void testBackground_p2fe() throws Exception {
         commonTests.generateNotesForType(Pf2eIndexType.background);
     }
-
+    @Test
+    public void testCreature_p2fe() throws Exception {
+        commonTests.generateNotesForType(Pf2eIndexType.creature);
+    }
     @Test
     public void testDeity_p2fe() throws Exception {
         commonTests.generateNotesForType(Pf2eIndexType.deity);

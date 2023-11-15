@@ -5,4 +5,5 @@ add support for X lore
 add support for statblock plugin 
 add javadoc to explain what each field etc does 
 hook up tests
-
+rework skills to be enum
+double check code review

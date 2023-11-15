@@ -30,28 +30,8 @@ public class Json2QuteCreature extends Json2QuteBase {
         }
         Optional<Integer> level = Pf2eCreature.level.getIntFrom(rootNode);
         level.ifPresent(integer -> tags.add("creature", "level", integer.toString()));
-        Collection<QuteInlineAttack> attacks = buildAttacks();
 
-        return new QuteCreature(sources,
-            text,
-            tags,
-            traits,
-            Field.alias.replaceTextFromList(rootNode, this),
-            Pf2eCreature.description.replaceTextFrom(rootNode, this),
-            level.orElse(null),
-            buildPerception().get(),
-            buildSenses(),
-            buildLanguages(),
-            buildAbilityMods(),
-            buildSkills(),
-            buildItems(),
-            buildSpeed(),
-            buildAttacks(),
-            buildSpellcasting(),
-            buildAbilities("top"),
-            buildAbilities("mid"),
-            buildAbilities("bot"),
-            buildDefenses());
+        return new QuteCreature(sources, text, tags, traits, Field.alias.replaceTextFromList(rootNode, this), Pf2eCreature.description.replaceTextFrom(rootNode, this), level.orElse(null), buildPerception().get(), buildSenses(), buildLanguages(), buildAbilityMods(), buildSkills(), buildItems(), buildSpeed(), buildAttacks(), buildSpellcasting(), buildAbilities("top"), buildAbilities("mid"), buildAbilities("bot"), buildDefenses());
     }
 
     private String buildLanguages() {
@@ -61,22 +41,18 @@ public class Json2QuteCreature extends Json2QuteBase {
         }
         StringBuilder sb = new StringBuilder();
 
-        if(languageNode.hasNonNull("languages")) {
-            languageNode.get("languages").forEach(l -> sb.append(toTitleCase(l.asText())).append(", "));
+        for (JsonNode l : Pf2eCreature.languages.getFromOrEmptyObjectNode(languageNode)) {
+            sb.append(toTitleCase(l.asText())).append(", ");
         }
-        if (languageNode.hasNonNull("notes")) {
-            languageNode.get("notes").forEach(noteNode -> {
-                sb.append(" (");
-                sb.append(replaceText(noteNode.asText()));
-                sb.append(")");
-            });
+        for (JsonNode noteNode : Pf2eCreature.notes.getFromOrEmptyObjectNode(languageNode)) {
+            sb.append(" (");
+            sb.append(replaceText(noteNode.asText()));
+            sb.append(")");
         }
-        if (languageNode.hasNonNull("abilities")) {
-            languageNode.get("abilities").forEach(abNote -> {
-                sb.append(" (");
-                sb.append(replaceText(abNote.asText()));
-                sb.append(")");
-            });
+        for (JsonNode abNote : Pf2eCreature.abilities.getFromOrEmptyObjectNode(languageNode)) {
+            sb.append(" (");
+            sb.append(replaceText(abNote.asText()));
+            sb.append(")");
         }
         return sb.toString();
     }
@@ -92,32 +68,25 @@ public class Json2QuteCreature extends Json2QuteBase {
             tui().errorf("Unknown spellcasting for %s: %s", sources.getKey(), array.toPrettyString());
             throw new IllegalArgumentException("Unknown spellcasting: " + getSources());
         }
-        array.forEach(node -> {
+        for (JsonNode node : array) {
             QuteDataSpellcasting spellcasting = new QuteDataSpellcasting();
             spellcasting.name = SourceField.name.replaceTextFrom(node, this);
-            if (node.has("tradition")) {
-                spellcasting.tradition = toTitleCase(node.get("tradition").asText());
-            }
-            spellcasting.type = node.get("type").asText(null);
-            if (node.has("DC")) {
-                spellcasting.DC = node.get("DC").asInt();
-            }
-            if (node.has("fp")) {
-                spellcasting.FP = node.get("fp").asInt();
-            }
+            spellcasting.tradition = Pf2eSpellcasting.tradition.getTextOrNull(node);
+            spellcasting.type =  Pf2eSpellcasting.type.getTextOrNull(node);
+            spellcasting.DC = Pf2eSpellcasting.DC.intOrDefault(node,0);
+            spellcasting.FP = Pf2eSpellcasting.fp.intOrDefault(node,0);
+
             spellcasting.spells = new TreeMap<>();
-            node.get("entry").fields().forEachRemaining(
-                f -> {
-                    if (f.getKey().equals("constant")) {
-                        f.getValue().fields().forEachRemaining(
-                            c -> spellcasting.spells.put("Constant" + "(" + numToSpellLevel(f) + ")", getSpells(c.getValue().get("spells"))));
-                    } else {
-                        spellcasting.spells.put(numToSpellLevel(f), getSpells(f.getValue().get("spells")));
-                    }
-                });
+            node.get("entry").fields().forEachRemaining(f -> {
+                if (f.getKey().equals("constant")) {
+                    f.getValue().fields().forEachRemaining(c -> spellcasting.spells.put("Constant" + "(" + numToSpellLevel(f) + ")", getSpells(c.getValue().get("spells"))));
+                } else {
+                    spellcasting.spells.put(numToSpellLevel(f), getSpells(f.getValue().get("spells")));
+                }
+            });
 
             spellcastings.add(spellcasting);
-        });
+        }
         return spellcastings;
     }
 
@@ -141,9 +110,7 @@ public class Json2QuteCreature extends Json2QuteBase {
             }
             if (s.has("notes")) {
                 List<String> notes = new ArrayList<>();
-                s.get("notes").forEach(
-                    note -> notes.add(note.asText())
-                );
+                s.get("notes").forEach(note -> notes.add(note.asText()));
                 spellName += String.join(",", notes) + ";";
             }
             spells.add(spellName);
@@ -169,19 +136,25 @@ public class Json2QuteCreature extends Json2QuteBase {
 
     private Collection<String> buildItems() {
         List<String> items = new ArrayList<>();
-        Json2QuteCreature.Pf2eCreature.items.getListOfStrings(rootNode, tui()).forEach(x -> items.add(replaceText(x)));
+        for (String x : Pf2eCreature.items.getListOfStrings(rootNode, tui())) {
+            items.add(replaceText(x));
+        }
         return items;
     }
 
     private Collection<QuteDataSenses> buildSenses() {
         Collection<QuteDataSenses> senses = new ArrayList<>();
-        Pf2eCreature.senses.withArrayFrom(rootNode).forEach(a -> senses.add(new QuteDataSenses(a.path("name").asText(), linkify(Pf2eIndexType.ability, a.path("type").asText(null)), a.path("range").asText(null))));
+        for (JsonNode a : Pf2eCreature.senses.withArrayFrom(rootNode)) {
+            senses.add(new QuteDataSenses(a.path("name").asText(), linkify(Pf2eIndexType.ability, a.path("type").asText(null)), a.path("range").asText(null)));
+        }
         return senses;
     }
 
     private Collection<QuteInlineAttack> buildAttacks() {
         List<QuteInlineAttack> attacks = new ArrayList<>();
-        Pf2eCreature.attacks.withArrayFrom(rootNode).forEach(a -> attacks.add(AttackField.createInlineAttack(a, this)));
+        for (JsonNode a : Pf2eCreature.attacks.withArrayFrom(rootNode)) {
+            attacks.add(AttackField.createInlineAttack(a, this));
+        }
         return attacks;
     }
 
@@ -189,7 +162,9 @@ public class Json2QuteCreature extends Json2QuteBase {
         JsonNode node = Pf2eCreature.abilities.getFrom(rootNode);
         List<QuteAbility> abilities = new ArrayList<>();
         if (node != null && node.has(region)) {
-            node.get(region).forEach(x -> abilities.add(Pf2eTypeAbility.createAbility(x, this, false)));
+            for (JsonNode x : node.get(region)) {
+                abilities.add(Pf2eTypeAbility.createAbility(x, this, false));
+            }
         }
         return abilities;
 
@@ -223,23 +198,7 @@ public class Json2QuteCreature extends Json2QuteBase {
 
         }
         QuteDataSkills skills = new QuteDataSkills();
-        skills.setArcana(aM.get("arcana"))
-            .setAthletics(aM.get("athletics"))
-            .setAcrobatics(aM.get("acrobatics"))
-            .setCrafting(aM.get("crafting"))
-            .setDiplomacy(aM.get("diplomacy"))
-            .setIntimidation(aM.get("intimidation"))
-            .setDeception(aM.get("deception"))
-            .setLore(aM.get("lore"))
-            .setMedicine(aM.get("medicine"))
-            .setNature(aM.get("nature"))
-            .setOccultism(aM.get("occultism"))
-            .setReligion(aM.get("religion"))
-            .setPerformance(aM.get("performance"))
-            .setSociety(aM.get("society"))
-            .setStealth(aM.get("stealth"))
-            .setSurvival(aM.get("survival"))
-            .setThievery(aM.get("thievery"));
+        skills.setArcana(aM.get("arcana")).setAthletics(aM.get("athletics")).setAcrobatics(aM.get("acrobatics")).setCrafting(aM.get("crafting")).setDiplomacy(aM.get("diplomacy")).setIntimidation(aM.get("intimidation")).setDeception(aM.get("deception")).setLore(aM.get("lore")).setMedicine(aM.get("medicine")).setNature(aM.get("nature")).setOccultism(aM.get("occultism")).setReligion(aM.get("religion")).setPerformance(aM.get("performance")).setSociety(aM.get("society")).setStealth(aM.get("stealth")).setSurvival(aM.get("survival")).setThievery(aM.get("thievery"));
         return skills;
     }
 
@@ -252,6 +211,13 @@ public class Json2QuteCreature extends Json2QuteBase {
     }
 
     enum Pf2eCreature implements JsonNodeReader {
-        abilities, abilityMods, alignment, attacks, defenses, description, hasImages, inflicts, isNpc, items, languages, level, perception, rarity, rituals, senses, size, skills, speed, spellcasting, traits,
+        abilities, abilityMods, alignment, attacks, defenses, description, hasImages, inflicts, isNpc, items, languages, level, perception, rarity, rituals, senses, size, skills, speed, spellcasting, traits, notes
+    }
+    enum Pf2eSpellcasting implements JsonNodeReader{
+        tradition,type,DC,fp,entry
+    }
+    enum Pf2eSkills implements JsonNodeReader{
+        arcana,athletics,acrobatics,crafting,diplomacy,survival,intimidation,deception,lore,medicine,nature,occultism,religion,performance,society,stealth,thievery
     }
 }
+
