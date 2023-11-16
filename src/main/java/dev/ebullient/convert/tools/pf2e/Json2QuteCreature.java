@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import dev.ebullient.convert.tools.JsonNodeReader;
 import dev.ebullient.convert.tools.Tags;
 import dev.ebullient.convert.tools.pf2e.qute.*;
+import org.yaml.snakeyaml.util.EnumUtils;
 
 public class Json2QuteCreature extends Json2QuteBase {
 
@@ -44,6 +45,7 @@ public class Json2QuteCreature extends Json2QuteBase {
         for (JsonNode l : Pf2eCreature.languages.getFromOrEmptyObjectNode(languageNode)) {
             sb.append(toTitleCase(l.asText())).append(", ");
         }
+        Pf2eCreature.notes.joinAndReplace()
         for (JsonNode noteNode : Pf2eCreature.notes.getFromOrEmptyObjectNode(languageNode)) {
             sb.append(" (");
             sb.append(replaceText(noteNode.asText()));
@@ -72,9 +74,9 @@ public class Json2QuteCreature extends Json2QuteBase {
             QuteDataSpellcasting spellcasting = new QuteDataSpellcasting();
             spellcasting.name = SourceField.name.replaceTextFrom(node, this);
             spellcasting.tradition = Pf2eSpellcasting.tradition.getTextOrNull(node);
-            spellcasting.type =  Pf2eSpellcasting.type.getTextOrNull(node);
-            spellcasting.DC = Pf2eSpellcasting.DC.intOrDefault(node,0);
-            spellcasting.FP = Pf2eSpellcasting.fp.intOrDefault(node,0);
+            spellcasting.type = Pf2eSpellcasting.type.getTextOrNull(node);
+            spellcasting.DC = Pf2eSpellcasting.DC.intOrDefault(node, 0);
+            spellcasting.FP = Pf2eSpellcasting.fp.intOrDefault(node, 0);
 
             spellcasting.spells = new TreeMap<>();
             node.get("entry").fields().forEachRemaining(f -> {
@@ -176,29 +178,42 @@ public class Json2QuteCreature extends Json2QuteBase {
             aM = Pf2eCreature.abilityMods.fieldFromTo(rootNode, HashMap.class, tui());
         }
         QuteDataAbilityMods abilityMods = new QuteDataAbilityMods();
-        abilityMods.setStrength(aM.getOrDefault("str", 0))
-            .setConstitution(aM.getOrDefault("con", 0))
-            .setDexterity(aM.getOrDefault("dex", 0))
-            .setIntelligence(aM.getOrDefault("int", 0))
-            .setWisdom(aM.getOrDefault("wis", 0))
-            .setCharisma(aM.getOrDefault("cha", 0));
+        abilityMods.setStrength(aM.getOrDefault("str", 0)).setConstitution(aM.getOrDefault("con", 0)).setDexterity(aM.getOrDefault("dex", 0)).setIntelligence(aM.getOrDefault("int", 0)).setWisdom(aM.getOrDefault("wis", 0)).setCharisma(aM.getOrDefault("cha", 0));
         return abilityMods;
     }
 
     private QuteDataSkills buildSkills() {
-        Map<String, Map<String, String>> aM = new HashMap<>();
-        if (Pf2eCreature.skills.existsIn(rootNode)) {
-            aM = Json2QuteCreature.Pf2eCreature.skills.fieldFromTo(rootNode, Map.class, tui());
-        }
-        List<String> skillList = List.of("arcana", "athletics", "acrobatics", "crafting", "diplomacy", "survival", "intimidation", "deception", "lore", "medicine", "nature", "occultism", "religion", "performance", "society", "stealth", "thievery");
-        if (!skillList.containsAll(aM.keySet())) {
-            Set<String> missingKeys = aM.keySet();
-            skillList.forEach(missingKeys::remove);
-            missingKeys.forEach(s -> tui().debugf("TODO: Unsupported Skill: %s", s));
-
-        }
         QuteDataSkills skills = new QuteDataSkills();
-        skills.setArcana(aM.get("arcana")).setAthletics(aM.get("athletics")).setAcrobatics(aM.get("acrobatics")).setCrafting(aM.get("crafting")).setDiplomacy(aM.get("diplomacy")).setIntimidation(aM.get("intimidation")).setDeception(aM.get("deception")).setLore(aM.get("lore")).setMedicine(aM.get("medicine")).setNature(aM.get("nature")).setOccultism(aM.get("occultism")).setReligion(aM.get("religion")).setPerformance(aM.get("performance")).setSociety(aM.get("society")).setStealth(aM.get("stealth")).setSurvival(aM.get("survival")).setThievery(aM.get("thievery"));
+        if (Pf2eCreature.skills.existsIn(rootNode)) {
+            JsonNode skillNode = Pf2eCreature.skills.getFrom(rootNode);
+            skillNode.fields().forEachRemaining(f -> {
+                    try {
+                        Pf2eSkills.valueOf(f.getKey());
+                    } catch (IllegalArgumentException e) {
+                        tui().debugf("TODO: Unsupported Skill: %s", f.getKey());
+                    }
+                }
+            );
+
+            // @formatter:off
+            skills.setArcana(Pf2eSkills.arcana.getMapOfStrings(skillNode,tui()))
+                .setAthletics(Pf2eSkills.athletics.getMapOfStrings(skillNode,tui()))
+                .setAcrobatics(Pf2eSkills.acrobatics.getMapOfStrings(skillNode,tui()))
+                .setCrafting(Pf2eSkills.crafting.getMapOfStrings(skillNode,tui()))
+                .setDiplomacy(Pf2eSkills.diplomacy.getMapOfStrings(skillNode,tui()))
+                .setIntimidation(Pf2eSkills.intimidation.getMapOfStrings(skillNode,tui()))
+                .setLore(Pf2eSkills.lore.getMapOfStrings(skillNode,tui()))
+                .setMedicine(Pf2eSkills.medicine.getMapOfStrings(skillNode,tui()))
+                .setNature(Pf2eSkills.nature.getMapOfStrings(skillNode,tui()))
+                .setOccultism(Pf2eSkills.occultism.getMapOfStrings(skillNode,tui()))
+                .setReligion(Pf2eSkills.religion.getMapOfStrings(skillNode,tui()))
+                .setPerformance(Pf2eSkills.performance.getMapOfStrings(skillNode,tui()))
+                .setSociety(Pf2eSkills.society.getMapOfStrings(skillNode,tui()))
+                .setStealth(Pf2eSkills.stealth.getMapOfStrings(skillNode,tui()))
+                .setSurvival(Pf2eSkills.survival.getMapOfStrings(skillNode,tui()))
+                .setThievery(Pf2eSkills.thievery.getMapOfStrings(skillNode,tui()));
+            // @formatter:on
+        }
         return skills;
     }
 
@@ -213,11 +228,13 @@ public class Json2QuteCreature extends Json2QuteBase {
     enum Pf2eCreature implements JsonNodeReader {
         abilities, abilityMods, alignment, attacks, defenses, description, hasImages, inflicts, isNpc, items, languages, level, perception, rarity, rituals, senses, size, skills, speed, spellcasting, traits, notes
     }
-    enum Pf2eSpellcasting implements JsonNodeReader{
-        tradition,type,DC,fp,entry
+
+    enum Pf2eSpellcasting implements JsonNodeReader {
+        tradition, type, DC, fp, entry
     }
-    enum Pf2eSkills implements JsonNodeReader{
-        arcana,athletics,acrobatics,crafting,diplomacy,survival,intimidation,deception,lore,medicine,nature,occultism,religion,performance,society,stealth,thievery
+
+    enum Pf2eSkills implements JsonNodeReader {
+        arcana, athletics, acrobatics, crafting, diplomacy, survival, intimidation, deception, lore, medicine, nature, occultism, religion, performance, society, stealth, thievery
     }
 }
 

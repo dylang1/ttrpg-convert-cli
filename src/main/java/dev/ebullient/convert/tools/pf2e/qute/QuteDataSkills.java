@@ -117,45 +117,43 @@ public class QuteDataSkills implements QuteUtil {
     @Override
     public String toString() {
         String s = buildSkillString(arcana, "Arcana")
-            + buildSkillString(acrobatics, "Acrobatics")
-            + buildSkillString(athletics, "Athletics")
-            + buildSkillString(crafting, "Crafting")
-            + buildSkillString(deception, "Deception")
-            + buildSkillString(diplomacy, "Diplomacy")
-            + buildSkillString(intimidation, "Intimidation")
-            + buildSkillString(lore, "Lore")
-            + buildSkillString(medicine, "Medicine")
-            + buildSkillString(nature, "Nature")
-            + buildSkillString(occultism, "Occultism")
-            + buildSkillString(performance, "Performance")
-            + buildSkillString(religion, "Religion")
-            + buildSkillString(society, "Society")
-            + buildSkillString(stealth, "Stealth")
-            + buildSkillString(survival, "Survival")
-            + buildSkillString(thievery, "Thievery");
+                + buildSkillString(acrobatics, "Acrobatics")
+                + buildSkillString(athletics, "Athletics")
+                + buildSkillString(crafting, "Crafting")
+                + buildSkillString(deception, "Deception")
+                + buildSkillString(diplomacy, "Diplomacy")
+                + buildSkillString(intimidation, "Intimidation")
+                + buildSkillString(lore, "Lore")
+                + buildSkillString(medicine, "Medicine")
+                + buildSkillString(nature, "Nature")
+                + buildSkillString(occultism, "Occultism")
+                + buildSkillString(performance, "Performance")
+                + buildSkillString(religion, "Religion")
+                + buildSkillString(society, "Society")
+                + buildSkillString(stealth, "Stealth")
+                + buildSkillString(survival, "Survival")
+                + buildSkillString(thievery, "Thievery");
         return s;
     }
-    private String buildSkillString(Map skill, String skillText) {
+
+    private String buildSkillString(Map<String, String> skill, String skillText) {
         if (skill == null || skill.isEmpty()) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        try {
-
-            sb.append(skillText);
-            skill.forEach((k, v) -> {
-                if (!k.equals("std")) {
-                    sb.append("( ").append(k).append(" )");
-                } else if (k.equals("note")) {
-                    sb.append("( ").append(v).append(" )");
-                } else {
-                    sb.append(" +").append(v);
-                }
-            });
-            sb.append(", ");
-        } catch (Exception e) {
-            System.out.printf("E");
+        sb.append(skillText);
+        for (Map.Entry<String, String> e : skill.entrySet()) {
+            String k = e.getKey();
+            String v = e.getValue();
+            if (!k.equals("std")) {
+                sb.append("( ").append(k).append(" )");
+            } else if (k.equals("note")) {
+                sb.append("( ").append(v).append(" )");
+            } else {
+                sb.append(" +").append(v);
+            }
         }
+        sb.append(", ");
         return sb.toString();
     }
 }
