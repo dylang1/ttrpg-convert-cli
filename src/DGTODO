@@ -4,6 +4,10 @@ fix embedded traits
 add support for X lore
 add support for statblock plugin 
 add javadoc to explain what each field etc does 
-hook up tests
-rework skills to be enum
+hook up tests -- PARTIALLY DONE 
+rework skills to be enum -- DONE
 double check code review
+copies
+fluff-images and fluff.json files
+reach trait breaking linking (it shouldnt link to a specific range)
+success degree misalignment 

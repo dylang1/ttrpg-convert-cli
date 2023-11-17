@@ -47,11 +47,11 @@ public class Pf2eDataConvertTest {
 //                    .stream()
 //                    .filter(x -> !x.endsWith("-id.json"))
 //                    .toList());
-//            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("book")));
+            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("book")));
             args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("bestiary")).stream().filter(x-> x.contains("creatures-b2.json")).toList());
 
             LaunchResult result = launcher.launch(args.toArray(new String[0]));
-            assertThat(result.exitCode())
+d             assertThat(result.exitCode())
                     .withFailMessage("Command failed. Output:%n%s", TestUtils.dump(result))
                     .isEqualTo(0);
 

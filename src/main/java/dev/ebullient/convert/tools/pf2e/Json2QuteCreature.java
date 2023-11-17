@@ -32,6 +32,10 @@ public class Json2QuteCreature extends Json2QuteBase {
         Optional<Integer> level = Pf2eCreature.level.getIntFrom(rootNode);
         level.ifPresent(integer -> tags.add("creature", "level", integer.toString()));
 
+        if(rootNode.has("_copy")){
+            tui().debugf("TODO: Found copy, currently unsupported,source=%s",sources);
+            return null;
+        }
         return new QuteCreature(sources, text, tags, traits, Field.alias.replaceTextFromList(rootNode, this), Pf2eCreature.description.replaceTextFrom(rootNode, this), level.orElse(null), buildPerception().get(), buildSenses(), buildLanguages(), buildAbilityMods(), buildSkills(), buildItems(), buildSpeed(), buildAttacks(), buildSpellcasting(), buildAbilities("top"), buildAbilities("mid"), buildAbilities("bot"), buildDefenses());
     }
 
@@ -45,17 +49,13 @@ public class Json2QuteCreature extends Json2QuteBase {
         for (JsonNode l : Pf2eCreature.languages.getFromOrEmptyObjectNode(languageNode)) {
             sb.append(toTitleCase(l.asText())).append(", ");
         }
-        Pf2eCreature.notes.joinAndReplace()
-        for (JsonNode noteNode : Pf2eCreature.notes.getFromOrEmptyObjectNode(languageNode)) {
-            sb.append(" (");
-            sb.append(replaceText(noteNode.asText()));
-            sb.append(")");
-        }
-        for (JsonNode abNote : Pf2eCreature.abilities.getFromOrEmptyObjectNode(languageNode)) {
-            sb.append(" (");
-            sb.append(replaceText(abNote.asText()));
-            sb.append(")");
-        }
+        sb.append(" (");
+        sb.append(Pf2eCreature.notes.joinAndReplace(languageNode, this));
+        sb.append(")");
+
+        sb.append(" (");
+        sb.append(Pf2eCreature.abilities.joinAndReplace(languageNode, this));
+        sb.append(")");
         return sb.toString();
     }
 
@@ -83,6 +83,9 @@ public class Json2QuteCreature extends Json2QuteBase {
                 if (f.getKey().equals("constant")) {
                     f.getValue().fields().forEachRemaining(c -> spellcasting.spells.put("Constant" + "(" + numToSpellLevel(f) + ")", getSpells(c.getValue().get("spells"))));
                 } else {
+                    if (f.getValue().get("level") == null && f.getKey().equals("0")) {
+                        System.out.println("lk");
+                    }
                     spellcasting.spells.put(numToSpellLevel(f), getSpells(f.getValue().get("spells")));
                 }
             });
@@ -94,7 +97,13 @@ public class Json2QuteCreature extends Json2QuteBase {
 
     private String numToSpellLevel(Map.Entry<String, JsonNode> map) {
         return switch (map.getKey()) {
-            case "0" -> String.format("Cantrips (%s)", map.getValue().get("level").asText());
+            case "0" -> {
+                if (map.getValue().hasNonNull("level")) {
+                    yield String.format("Cantrips (%s)", map.getValue().get("level").asText());
+                } else {
+                    yield "Cantrips";
+                }
+            }
             default -> getOrdinalForm(map.getKey());
         };
     }
@@ -222,7 +231,14 @@ public class Json2QuteCreature extends Json2QuteBase {
         if (defenseNode == null) {
             return null;
         }
-        return Pf2eDefenses.createInlineDefenses(defenseNode, this);
+//        return Pf2eDefenses.createInlineDefenses(defenseNode, this);
+        QuteDataDefenses qd=null;
+        try {
+            qd = Pf2eDefenses.createInlineDefenses(defenseNode, this);
+        } catch (Exception e) {
+            System.out.println("Error");
+        }
+        return qd;
     }
 
     enum Pf2eCreature implements JsonNodeReader {
