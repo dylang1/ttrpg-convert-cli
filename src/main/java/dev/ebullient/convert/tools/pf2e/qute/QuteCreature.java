@@ -5,6 +5,7 @@ import dev.ebullient.convert.tools.pf2e.Pf2eSources;
 import io.quarkus.qute.TemplateData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
@@ -95,32 +96,29 @@ public class QuteCreature extends Pf2eQuteBase {
 //        this.defenses = defenses;
 //    }
 
-    public Collection<String> attacks(){
+    public Collection<String> attacks() {
         List<String> attackString = new ArrayList<>();
-        for (QuteInlineAttack attack: attacks ) {
-            String sb = " ***" +
-                attack.meleeOrRanged +
-                "*** " +
-                attack.activity +
-                attack.getName() +
-                attack.traits +
-                "**Damage** " +
-                attack.damage;
+        for (QuteInlineAttack attack : attacks) {
+            String sb = " ***" + attack.meleeOrRanged + "*** " + attack.activity + attack.getName() + attack.traits + "**Damage** " + attack.damage;
             attackString.add(sb);
 
         }
         return attackString;
     }
-    public Collection<String> topAbilities(){
+
+    public Collection<String> topAbilities() {
         return getAbilities(topAbilities);
     }
-    public Collection<String> midAbilities(){
+
+    public Collection<String> midAbilities() {
         return getAbilities(midAbilities);
     }
-    public Collection<String> botAbilities(){
+
+    public Collection<String> botAbilities() {
         return getAbilities(botAbilities);
     }
-    public String defenses(){
+
+    public String defenses() {
         List<String> lines = new ArrayList<>();
         List<String> first = new ArrayList<>();
         List<String> second = new ArrayList<>();
@@ -134,15 +132,13 @@ public class QuteCreature extends Pf2eQuteBase {
             lines.add(String.join("; ", first));
         }
         if (defenses.hpHardness != null) {
-            second.add( "> "+ defenses.hpHardness.stream()
-                .map(QuteDataHpHardness::toString)
-                .collect(Collectors.joining("; ")));
+            second.add("> " + defenses.hpHardness.stream().map(QuteDataHpHardness::toString).collect(Collectors.joining("; ")));
         }
         if (isPresent(defenses.immunities)) {
             second.add("**Immunities** " + String.join(", ", defenses.immunities));
         }
-        if(!second.isEmpty()){
-            lines.add(String.join("; ",second));
+        if (!second.isEmpty()) {
+            lines.add(String.join("; ", second));
         }
         if (isPresent(defenses.resistances)) {
             lines.add("> **Resistances** " + String.join(", ", defenses.resistances));
@@ -155,27 +151,47 @@ public class QuteCreature extends Pf2eQuteBase {
 
     private List<String> getAbilities(Collection<QuteAbility> abilities) {
         List<String> abilityString = new ArrayList<>();
-        for(QuteAbility ability : abilities){
+        for (QuteAbility ability : abilities) {
             String ab = " *** " +
                 ability.getName() +
-                " ***" +
-                (ability.activity !=null ? ability.activity.toString() :"")+
-                printIfNotNull(ability.getHasDetails(),"( "+ability.getBareTraitList())+") "+
-                printIfNotNull(ability.cost)+
-                printIfNotNull(ability.frequency)+
-                printIfNotNull(ability.trigger)+
-                printIfNotNull(ability.requirements)+
-                printIfNotNull(ability.text).replaceAll("\n+","\n>")+
-                printIfNotNull(ability.note);
+                " ***"
+                + (ability.activity != null ? ability.activity.toString() : "")
+                + printIfNotNull(!ability.getTraitList().isEmpty(), "( " + ability.getTraitList() + ") ")
+                + printIfNotNull(ability.cost) + printIfNotNull(ability.frequency)
+                + printIfNotNull(ability.trigger) + printIfNotNull(ability.requirements)
+                + formatAbilityText(ability.text) + printIfNotNull(ability.note);
             abilityString.add(ab);
         }
         return abilityString;
     }
 
-    private String printIfNotNull(Boolean toPrint,String s ){
+    private String printIfNotNull(Boolean toPrint, String s) {
         return toPrint ? s : "";
     }
-    private String printIfNotNull(String s){
-        return printIfNotNull(s!=null,s);
+
+    private String printIfNotNull(String s) {
+        return printIfNotNull(s != null, s);
+    }
+
+    private String formatAbilityText(String text) {
+        if (text == null) {
+            return "";
+        }
+        String retText = text.replaceAll("\n", "\n>");
+        retText = retText.replace("**.**", "");
+        retText = retText.replaceAll("\\h+>", ">");
+        //Add an additional > on the last line after an >> indented block to ensure it renders correctly
+        String[] lines = retText.split("\n");
+        for (int i = lines.length - 1; i >= 0; i--) {
+            String line = lines[i];
+            if (line.startsWith(">>")) {
+                line = line + "\n>";
+                lines[i] = line;
+                break;
+            }
+        }
+        retText = String.join("\n", lines);
+        return retText;
+
     }
 }

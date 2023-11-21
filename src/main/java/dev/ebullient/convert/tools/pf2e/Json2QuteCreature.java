@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import dev.ebullient.convert.tools.JsonNodeReader;
 import dev.ebullient.convert.tools.Tags;
 import dev.ebullient.convert.tools.pf2e.qute.*;
-import org.yaml.snakeyaml.util.EnumUtils;
+import jakarta.json.Json;
 
 public class Json2QuteCreature extends Json2QuteBase {
 
@@ -26,6 +26,7 @@ public class Json2QuteCreature extends Json2QuteBase {
         appendToText(text, SourceField.entries.getFrom(rootNode), "##");
 
         Collection<String> traits = collectTraitsFrom(rootNode, tags);
+        //Possibly remove as remaster?
         if (Pf2eCreature.alignment.existsIn(rootNode)) {
             traits.addAll(toAlignments(rootNode, Pf2eCreature.alignment));
         }
@@ -35,6 +36,9 @@ public class Json2QuteCreature extends Json2QuteBase {
         if(rootNode.has("_copy")){
             tui().debugf("TODO: Found copy, currently unsupported,source=%s",sources);
             return null;
+        }
+        if(sources.getName().equals("Ancient Umbral Dragon")){
+            System.out.println("XX");
         }
         return new QuteCreature(sources, text, tags, traits, Field.alias.replaceTextFromList(rootNode, this), Pf2eCreature.description.replaceTextFrom(rootNode, this), level.orElse(null), buildPerception().get(), buildSenses(), buildLanguages(), buildAbilityMods(), buildSkills(), buildItems(), buildSpeed(), buildAttacks(), buildSpellcasting(), buildAbilities("top"), buildAbilities("mid"), buildAbilities("bot"), buildDefenses());
     }
@@ -49,19 +53,21 @@ public class Json2QuteCreature extends Json2QuteBase {
         for (JsonNode l : Pf2eCreature.languages.getFromOrEmptyObjectNode(languageNode)) {
             sb.append(toTitleCase(l.asText())).append(", ");
         }
-        sb.append(" (");
-        sb.append(Pf2eCreature.notes.joinAndReplace(languageNode, this));
-        sb.append(")");
-
-        sb.append(" (");
-        sb.append(Pf2eCreature.abilities.joinAndReplace(languageNode, this));
-        sb.append(")");
+        if(Pf2eCreature.notes.existsIn(languageNode)) {
+            sb.append(" (");
+            sb.append(Pf2eCreature.notes.joinAndReplace(languageNode, this));
+            sb.append(")");
+        }
+        if(Pf2eCreature.abilities.existsIn(languageNode)) {
+            sb.append(" (");
+            sb.append(Pf2eCreature.abilities.joinAndReplace(languageNode, this));
+            sb.append(")");
+        }
         return sb.toString();
     }
 
     private Collection<QuteDataSpellcasting> buildSpellcasting() {
         List<QuteDataSpellcasting> spellcastings = new ArrayList<>();
-        Pf2eCreature.spellcasting.getFrom(rootNode);
 
         JsonNode array = Pf2eCreature.spellcasting.getFrom(rootNode);
         if (array == null || array.isNull()) {
@@ -73,7 +79,7 @@ public class Json2QuteCreature extends Json2QuteBase {
         for (JsonNode node : array) {
             QuteDataSpellcasting spellcasting = new QuteDataSpellcasting();
             spellcasting.name = SourceField.name.replaceTextFrom(node, this);
-            spellcasting.tradition = Pf2eSpellcasting.tradition.getTextOrNull(node);
+            spellcasting.tradition = toTitleCase(Pf2eSpellcasting.tradition.getTextOrNull(node));
             spellcasting.type = Pf2eSpellcasting.type.getTextOrNull(node);
             spellcasting.DC = Pf2eSpellcasting.DC.intOrDefault(node, 0);
             spellcasting.FP = Pf2eSpellcasting.fp.intOrDefault(node, 0);
@@ -83,9 +89,6 @@ public class Json2QuteCreature extends Json2QuteBase {
                 if (f.getKey().equals("constant")) {
                     f.getValue().fields().forEachRemaining(c -> spellcasting.spells.put("Constant" + "(" + numToSpellLevel(f) + ")", getSpells(c.getValue().get("spells"))));
                 } else {
-                    if (f.getValue().get("level") == null && f.getKey().equals("0")) {
-                        System.out.println("lk");
-                    }
                     spellcasting.spells.put(numToSpellLevel(f), getSpells(f.getValue().get("spells")));
                 }
             });
@@ -195,14 +198,6 @@ public class Json2QuteCreature extends Json2QuteBase {
         QuteDataSkills skills = new QuteDataSkills();
         if (Pf2eCreature.skills.existsIn(rootNode)) {
             JsonNode skillNode = Pf2eCreature.skills.getFrom(rootNode);
-            skillNode.fields().forEachRemaining(f -> {
-                    try {
-                        Pf2eSkills.valueOf(f.getKey());
-                    } catch (IllegalArgumentException e) {
-                        tui().debugf("TODO: Unsupported Skill: %s", f.getKey());
-                    }
-                }
-            );
 
             // @formatter:off
             skills.setArcana(Pf2eSkills.arcana.getMapOfStrings(skillNode,tui()))
@@ -210,8 +205,8 @@ public class Json2QuteCreature extends Json2QuteBase {
                 .setAcrobatics(Pf2eSkills.acrobatics.getMapOfStrings(skillNode,tui()))
                 .setCrafting(Pf2eSkills.crafting.getMapOfStrings(skillNode,tui()))
                 .setDiplomacy(Pf2eSkills.diplomacy.getMapOfStrings(skillNode,tui()))
+                .setDeception(Pf2eSkills.deception.getMapOfStrings(skillNode,tui()))
                 .setIntimidation(Pf2eSkills.intimidation.getMapOfStrings(skillNode,tui()))
-                .setLore(Pf2eSkills.lore.getMapOfStrings(skillNode,tui()))
                 .setMedicine(Pf2eSkills.medicine.getMapOfStrings(skillNode,tui()))
                 .setNature(Pf2eSkills.nature.getMapOfStrings(skillNode,tui()))
                 .setOccultism(Pf2eSkills.occultism.getMapOfStrings(skillNode,tui()))
@@ -221,6 +216,10 @@ public class Json2QuteCreature extends Json2QuteBase {
                 .setStealth(Pf2eSkills.stealth.getMapOfStrings(skillNode,tui()))
                 .setSurvival(Pf2eSkills.survival.getMapOfStrings(skillNode,tui()))
                 .setThievery(Pf2eSkills.thievery.getMapOfStrings(skillNode,tui()));
+            Map<String,String> x = new HashMap<>();
+            x.putAll(Pf2eSkills.lore.getMapOfStrings(skillNode,tui()));
+            x.putAll(Pf2eSkills.loreBuild(skillNode));
+            skills.setLore(x);
             // @formatter:on
         }
         return skills;
@@ -250,7 +249,19 @@ public class Json2QuteCreature extends Json2QuteBase {
     }
 
     enum Pf2eSkills implements JsonNodeReader {
-        arcana, athletics, acrobatics, crafting, diplomacy, survival, intimidation, deception, lore, medicine, nature, occultism, religion, performance, society, stealth, thievery
+        arcana, athletics, acrobatics, crafting, diplomacy, survival, intimidation, deception, lore, medicine, nature, occultism, religion, performance, society, stealth, thievery;
+
+        public static Map<String,String> loreBuild(JsonNode skillNode){
+            Iterator<Map.Entry<String, JsonNode>> i = skillNode.fields();
+            Map<String,String> loreSkills = new HashMap<>();
+            while(i.hasNext()){
+                Map.Entry<String,JsonNode> field = i.next();
+                if(field.getKey().contains("lore") && !"lore".equals(field.getKey())){
+                    loreSkills.put(field.getKey(),field.getValue().get("std").asText());
+                }
+            }
+            return loreSkills;
+        }
     }
 }
 

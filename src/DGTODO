@@ -1,7 +1,7 @@
-fix abilities getting added misaligned - make sure not to break hazards
-Change rendering of attacks 
-fix embedded traits
-add support for X lore
+fix abilities getting added misaligned - make sure not to break hazards -- DONE
+Change rendering of attacks -- DONE
+fix embedded traits -- DONE 
+add support for X lore -- DONE (THINK)
 add support for statblock plugin 
 add javadoc to explain what each field etc does 
 hook up tests -- PARTIALLY DONE 
@@ -9,5 +9,5 @@ rework skills to be enum -- DONE
 double check code review
 copies
 fluff-images and fluff.json files
-reach trait breaking linking (it shouldnt link to a specific range)
-success degree misalignment 
+reach trait breaking linking (it shouldnt link to a specific range) (need to update linkify)
+success degree misalignment -- DONE
