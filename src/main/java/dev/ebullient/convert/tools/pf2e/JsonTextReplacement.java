@@ -52,7 +52,7 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
 
     Pf2eIndex index();
 
-    Pf2eSources getSources();
+    Pf2VttSources getSources();
 
     default Tui tui() {
         return cfg().tui();

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import dev.ebullient.convert.io.Tui;
 import dev.ebullient.convert.tools.pf2e.Pf2eIndexType;
-import dev.ebullient.convert.tools.pf2e.Pf2eSources;
+import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
 import io.quarkus.qute.TemplateData;
 
 /**
@@ -28,7 +28,7 @@ public class QuteTraitIndex extends Pf2eQuteNote {
     /** Map of category to a list of traits */
     public final Map<String, Collection<String>> categoryToTraits;
 
-    public QuteTraitIndex(Pf2eSources sources, Map<String, Collection<String>> categoryToTraits) {
+    public QuteTraitIndex(Pf2VttSources sources, Map<String, Collection<String>> categoryToTraits) {
         super(Pf2eIndexType.syntheticGroup, sources, "Trait Index");
         this.categoryToTraits = new TreeMap<>();
         for (Map.Entry<String, Collection<String>> entry : categoryToTraits.entrySet()) {

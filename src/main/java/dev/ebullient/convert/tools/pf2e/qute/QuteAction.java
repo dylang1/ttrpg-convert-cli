@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2eSources;
+import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
 import io.quarkus.qute.TemplateData;
 
 /**
@@ -36,10 +36,10 @@ public class QuteAction extends Pf2eQuteBase {
     /** Activity/Activation cost (as {@link dev.ebullient.convert.tools.pf2e.qute.QuteDataActivity QuteDataActivity}) */
     public final QuteDataActivity activity;
 
-    public QuteAction(Pf2eSources sources, List<String> text, Tags tags,
-            String cost, String trigger, List<String> aliases, Collection<String> traits,
-            String prerequisites, String requirements, String frequency,
-            QuteDataActivity activity, ActionType actionType) {
+    public QuteAction(Pf2VttSources sources, List<String> text, Tags tags,
+                      String cost, String trigger, List<String> aliases, Collection<String> traits,
+                      String prerequisites, String requirements, String frequency,
+                      QuteDataActivity activity, ActionType actionType) {
         super(sources, text, tags);
         this.trigger = trigger;
         this.aliases = aliases;

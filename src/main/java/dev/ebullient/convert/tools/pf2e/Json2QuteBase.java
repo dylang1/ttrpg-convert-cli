@@ -13,13 +13,13 @@ public abstract class Json2QuteBase implements Pf2eTypeReader {
     protected final Pf2eIndex index;
     protected final Pf2eIndexType type;
     protected final JsonNode rootNode;
-    protected final Pf2eSources sources;
+    protected final Pf2VttSources sources;
 
     public Json2QuteBase(Pf2eIndex index, Pf2eIndexType type, JsonNode rootNode) {
-        this(index, type, rootNode, Pf2eSources.findOrTemporary(type, rootNode));
+        this(index, type, rootNode, Pf2VttSources.findOrTemporary(type, rootNode));
     }
 
-    public Json2QuteBase(Pf2eIndex index, Pf2eIndexType type, JsonNode rootNode, Pf2eSources sources) {
+    public Json2QuteBase(Pf2eIndex index, Pf2eIndexType type, JsonNode rootNode, Pf2VttSources sources) {
         this.index = index;
         this.type = type;
         this.rootNode = rootNode;
@@ -32,7 +32,7 @@ public abstract class Json2QuteBase implements Pf2eTypeReader {
     }
 
     @Override
-    public Pf2eSources getSources() {
+    public Pf2VttSources getSources() {
         return sources;
     }
 

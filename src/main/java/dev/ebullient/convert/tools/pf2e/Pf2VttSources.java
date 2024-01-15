@@ -15,46 +15,46 @@ import dev.ebullient.convert.tools.ToolsIndex.TtrpgValue;
 import io.quarkus.qute.TemplateData;
 
 @TemplateData
-public class Pf2eSources extends CompendiumSources {
+public class Pf2VttSources extends CompendiumSources {
 
-    private static final Map<String, Pf2eSources> keyToSources = new HashMap<>();
+    private static final Map<String, Pf2VttSources> keyToSources = new HashMap<>();
     private static final Map<String, ImageRef> imageSourceToRef = new HashMap<>();
 
-    public static Pf2eSources findSources(String key) {
+    public static Pf2VttSources findSources(String key) {
         return keyToSources.get(key);
     }
 
-    public static Pf2eSources findSources(JsonNode node) {
+    public static Pf2VttSources findSources(JsonNode node) {
         String key = TtrpgValue.indexKey.getFromNode(node);
         return keyToSources.get(key);
     }
 
-    public static Pf2eSources constructSources(Pf2eIndexType type, JsonNode node) {
+    public static Pf2VttSources constructSources(Pf2eIndexType type, JsonNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Must pass a JsonNode");
         }
         String key = TtrpgValue.indexKey.getFromNode(node);
         return keyToSources.computeIfAbsent(key, k -> {
-            Pf2eSources s = new Pf2eSources(type, key, node);
+            Pf2VttSources s = new Pf2VttSources(type, key, node);
             s.checkKnown();
             return s;
         });
     }
 
-    public static Pf2eSources constructSyntheticSource(String name) {
+    public static Pf2VttSources constructSyntheticSource(String name) {
         String key = Pf2eIndexType.syntheticGroup.createKey(name, "mixed");
-        return new Pf2eSources(Pf2eIndexType.syntheticGroup, key, null);
+        return new Pf2VttSources(Pf2eIndexType.syntheticGroup, key, null);
     }
 
-    public static Pf2eSources createEmbeddedSource(JsonNode node) {
+    public static Pf2VttSources createEmbeddedSource(JsonNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Must pass a JsonNode");
         }
         String key = Pf2eIndexType.bookReference.createKey(node);
-        return new Pf2eSources(Pf2eIndexType.bookReference, key, node);
+        return new Pf2VttSources(Pf2eIndexType.bookReference, key, node);
     }
 
-    public static Pf2eSources findOrTemporary(Pf2eIndexType type, JsonNode node) {
+    public static Pf2VttSources findOrTemporary(Pf2eIndexType type, JsonNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Must pass a JsonNode");
         }
@@ -62,9 +62,9 @@ public class Pf2eSources extends CompendiumSources {
         if (key == null) {
             key = type.createKey(node);
         }
-        Pf2eSources sources = findSources(key);
+        Pf2VttSources sources = findSources(key);
         return sources == null
-                ? new Pf2eSources(type, key, node)
+                ? new Pf2VttSources(type, key, node)
                 : sources;
     }
 
@@ -103,7 +103,7 @@ public class Pf2eSources extends CompendiumSources {
 
     final Pf2eIndexType type;
 
-    private Pf2eSources(Pf2eIndexType type, String key, JsonNode node) {
+    private Pf2VttSources(Pf2eIndexType type, String key, JsonNode node) {
         super(type, key, node);
         this.type = type;
     }

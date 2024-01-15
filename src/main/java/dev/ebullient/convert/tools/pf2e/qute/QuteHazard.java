@@ -7,7 +7,7 @@ import java.util.List;
 
 import dev.ebullient.convert.qute.QuteUtil;
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2eSources;
+import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
 import io.quarkus.qute.TemplateData;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
@@ -43,11 +43,11 @@ public class QuteHazard extends Pf2eQuteBase {
     public final QuteHazardAttributes stealth;
     public final QuteHazardAttributes perception;
 
-    public QuteHazard(Pf2eSources sources, List<String> text, Tags tags,
-            Collection<String> traits, String level, String disable,
-            String reset, String routine, QuteDataDefenses defenses,
-            List<String> abilities, List<String> actions,
-            QuteHazardAttributes stealth, QuteHazardAttributes perception) {
+    public QuteHazard(Pf2VttSources sources, List<String> text, Tags tags,
+                      Collection<String> traits, String level, String disable,
+                      String reset, String routine, QuteDataDefenses defenses,
+                      List<String> abilities, List<String> actions,
+                      QuteHazardAttributes stealth, QuteHazardAttributes perception) {
         super(sources, text, tags);
         this.traits = traits;
         this.level = level;

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2eSources;
+import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
 import io.quarkus.qute.TemplateData;
 
 /**
@@ -23,8 +23,8 @@ public class QuteArchetype extends Pf2eQuteBase {
     public final List<String> benefits;
     public final List<String> feats;
 
-    public QuteArchetype(Pf2eSources sources, List<String> text, Tags tags,
-            Collection<String> traits, int dedicationLevel, List<String> benefits, List<String> feats) {
+    public QuteArchetype(Pf2VttSources sources, List<String> text, Tags tags,
+                         Collection<String> traits, int dedicationLevel, List<String> benefits, List<String> feats) {
         super(sources, text, tags);
 
         this.traits = traits;

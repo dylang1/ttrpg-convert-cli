@@ -82,7 +82,7 @@ public enum Pf2eActivity {
         Path relativeTarget = Path.of("img", targetFileName);
         return new QuteDataActivity(
                 text,
-                Pf2eSources.buildStreamImageRef(convert.index(), glyph, relativeTarget, longName),
+                Pf2VttSources.buildStreamImageRef(convert.index(), glyph, relativeTarget, longName),
                 textGlyph,
                 this.getRulesPath(convert.index().rulesVaultRoot()));
     }

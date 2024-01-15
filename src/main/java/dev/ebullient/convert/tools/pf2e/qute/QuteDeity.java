@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import dev.ebullient.convert.qute.NamedText;
 import dev.ebullient.convert.qute.QuteUtil;
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2eSources;
+import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
 import io.quarkus.qute.TemplateData;
 
 /**
@@ -47,10 +47,10 @@ public class QuteDeity extends Pf2eQuteBase {
     public final QuteDivineAvatar avatar;
     public final QuteDivineIntercession intercession;
 
-    public QuteDeity(Pf2eSources sources, List<String> text, Tags tags,
-            List<String> aliases, String category, String pantheon,
-            String alignment, String followerAlignment, String areasOfConcern, String edicts, String anathema,
-            QuteDeityCleric cleric, QuteDivineAvatar avatar, QuteDivineIntercession intercession) {
+    public QuteDeity(Pf2VttSources sources, List<String> text, Tags tags,
+                     List<String> aliases, String category, String pantheon,
+                     String alignment, String followerAlignment, String areasOfConcern, String edicts, String anathema,
+                     QuteDeityCleric cleric, QuteDivineAvatar avatar, QuteDivineIntercession intercession) {
         super(sources, text, tags);
         this.aliases = aliases;
         this.category = category;

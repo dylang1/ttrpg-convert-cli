@@ -22,8 +22,9 @@ import dev.ebullient.convert.io.MarkdownWriter;
 import dev.ebullient.convert.io.Tui;
 import dev.ebullient.convert.tools.MarkdownConverter;
 import dev.ebullient.convert.tools.ToolsIndex;
+import dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttIndexType;
 
-public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
+public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
     static final String CORE_RULES_KEY = "book|book-crb";
     final CompendiumConfig config;
 
@@ -39,7 +40,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
 
     final JsonSourceCopier copier = new JsonSourceCopier(this);
 
-    public Pf2eIndex(CompendiumConfig config) {
+    public Pf2VttIndex(CompendiumConfig config) {
         this.config = config;
     }
 
@@ -49,7 +50,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
     }
 
     @Override
-    public Pf2eIndex importTree(String filename, JsonNode node) {
+    public Pf2VttIndex importTree(String filename, JsonNode node) {
         if (!node.isObject()) {
             return this;
         }
@@ -58,44 +59,44 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
         config.readConfigurationIfPresent(node);
 
         // data ingest. Minimal processing.
-        Pf2eIndexType.ability.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.action.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.archetype.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.background.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.curse.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.condition.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.deity.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.disease.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.domain.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.feat.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.hazard.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.baseitem.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.item.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.ritual.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.skill.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.spell.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.table.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.trait.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.ability.withArrayFrom(node, this::addToIndex);
+        Pf2VttIndexType.action.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.archetype.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.background.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.curse.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.condition.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.deity.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.disease.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.domain.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.feat.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.hazard.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.baseitem.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.item.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.ritual.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.skill.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.spell.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.table.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.trait.withArrayFrom(node, this::addToIndex);
+//
+//        Pf2VttIndexType.adventure.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.book.withArrayFrom(node, this::addToIndex);
+//        Pf2VttIndexType.creature.withArrayFrom(node,this::addToIndex);
 
-        Pf2eIndexType.adventure.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.book.withArrayFrom(node, this::addToIndex);
-        Pf2eIndexType.creature.withArrayFrom(node,this::addToIndex);
-
-        addDataToIndex(Pf2eIndexType.data.getFrom(node), filename);
+        addDataToIndex(Pf2VttIndexType.data.getFrom(node), filename);
 
         return this;
     }
 
-    void addToIndex(Pf2eIndexType type, JsonNode node) {
-        if (type == Pf2eIndexType.baseitem) {
+    void addToIndex(Pf2VttIndexType type, JsonNode node) {
+        if (type == Pf2VttIndexType.baseitem) {
             // always use item (baseitem is a detail that we have remembered if we need it)
-            type = Pf2eIndexType.item;
+            type = Pf2VttIndexType.item;
         }
         TtrpgValue.indexInputType.addToNode(node, type.name());
         // TODO: Variants? Reprints?
         String key = type.createKey(node);
         String hash = Field.add_hash.getTextOrNull(node);
-        if (type == Pf2eIndexType.trait) {
+        if (type == Pf2VttIndexType.trait) {
             key = prepareTrait(key, node);
         } else if (hash != null) {
             String name = SourceField.name.getTextOrEmpty(node);
@@ -108,8 +109,8 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
         if (previous != null) {
             // We include the CRB by default, otherwise, say something about skipping duplicates
             if (!"book|book-crb".equals(key) &&
-                    (!SourceField.name.valueEquals(previous, node) || !SourceField.source.valueEquals(previous, node)
-                            || !SourceField.page.valueEquals(previous, node))) {
+                (!SourceField.name.valueEquals(previous, node) || !SourceField.source.valueEquals(previous, node)
+                    || !SourceField.page.valueEquals(previous, node))) {
                 tui().debugf("Skipping %s, already indexed", key);
             }
             return;
@@ -126,22 +127,22 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
         if (name.startsWith("[") || alignment != null) {
             // Update name & object node
             name = alignment == null
-                    ? name.replaceAll("\\[(.*)]", "Any $1")
-                    : alignment.longName;
-            key = replaceName(Pf2eIndexType.trait, name, key, node, true);
+                ? name.replaceAll("\\[(.*)]", "Any $1")
+                : alignment.longName;
+            key = replaceName(Pf2VttIndexType.trait, name, key, node, true);
         }
 
         // Quick lookup for traits
-        String source = SourceField.source.getTextOrDefault(node, Pf2eIndexType.trait.defaultSourceString());
+        String source = SourceField.source.getTextOrDefault(node, Pf2VttIndexType.trait.defaultSourceString());
         String oldSource = traitToSource.put(name.toLowerCase(), source);
         if (oldSource != null && !oldSource.equals(source)) {
             tui().warnf("Duplicate trait name %s, from source %s and %s",
-                    name, source, oldSource);
+                name, source, oldSource);
         }
         return key;
     }
 
-    private String replaceName(Pf2eIndexType type, String newName, String oldKey, JsonNode node, boolean makeAlias) {
+    private String replaceName(Pf2VttIndexType type, String newName, String oldKey, JsonNode node, boolean makeAlias) {
         ((ObjectNode) node).put("name", newName);
 
         // Create new key, add alias from old key
@@ -159,7 +160,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
         int slash = filename.indexOf('/');
         int dot = filename.indexOf('.');
         String name = filename.substring(slash < 0 ? 0 : slash + 1, dot < 0 ? filename.length() : dot);
-        String key = Pf2eIndexType.data.createKey(name, null); // e.g. data|book-crb
+        String key = Pf2VttIndexType.data.createKey(name, null); // e.g. data|book-crb
         if (imported.containsKey(key)) {
             return;
         }
@@ -185,26 +186,26 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
         }
 
         imported.forEach((key, node) -> {
-            Pf2eIndexType type = Pf2eIndexType.getTypeFromKey(key);
+            Pf2VttIndexType type = Pf2VttIndexType.getTypeFromKey(key);
 
             if (type.checkCopiesAndReprints()) {
                 // check for / manage copies first (creatures, fluff)
                 node = copier.handleCopy(type, node);
             }
-            Pf2VttSources sources = Pf2VttSources.constructSources(type, node); // pre-construct sources
+            dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttSources sources = dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttSources.constructSources(type, node); // pre-construct sources
 
-            if (type == Pf2eIndexType.feat && keyIsIncluded(key, node)) {
+            if (type == Pf2VttIndexType.feat && keyIsIncluded(key, node)) {
                 createArchetypeReference(key, node, sources);
-            } else if (type == Pf2eIndexType.spell && keyIsIncluded(key, node)) {
+            } else if (type == Pf2VttIndexType.spell && keyIsIncluded(key, node)) {
                 createDomainReference(key, node);
-            } else if (type == Pf2eIndexType.trait) {
+            } else if (type == Pf2VttIndexType.trait) {
                 createTraitReference(key, node, sources);
             }
         });
 
         imported.entrySet().stream()
-                .filter(e -> keyIsIncluded(e.getKey(), e.getValue()))
-                .forEach(e -> filteredIndex.put(e.getKey(), e.getValue()));
+            .filter(e -> keyIsIncluded(e.getKey(), e.getValue()))
+            .forEach(e -> filteredIndex.put(e.getKey(), e.getValue()));
     }
 
     private void createTraitReference(String key, JsonNode node, Pf2VttSources sources) {
@@ -213,9 +214,9 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
         String traitLink = linkifyTrait(node, name);
 
         Field.categories.getListOfStrings(node, tui()).stream()
-                .filter(c -> !c.equalsIgnoreCase("_alignAbv"))
-                .forEach(c -> categoryToTraits.computeIfAbsent(c, k -> new TreeSet<>())
-                        .add(traitLink));
+            .filter(c -> !c.equalsIgnoreCase("_alignAbv"))
+            .forEach(c -> categoryToTraits.computeIfAbsent(c, k -> new TreeSet<>())
+                .add(traitLink));
     }
 
     void createArchetypeReference(String key, JsonNode node, Pf2VttSources sources) {
@@ -225,15 +226,15 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
             archetype.forEach(a -> {
                 String aKey = Pf2eIndexType.archetype.createKey(a, sources.primarySource());
                 archetypeToFeats.computeIfAbsent(aKey, k -> new HashSet<>())
-                        .add(key);
+                    .add(key);
             });
         }
     }
 
     void createDomainReference(String key, JsonNode node) {
         Pf2eSpell.domains.getListOfStrings(node, tui())
-                .forEach(d -> domainToSpells.computeIfAbsent(d.toLowerCase(), k -> new HashSet<>())
-                        .add(key));
+            .forEach(d -> domainToSpells.computeIfAbsent(d.toLowerCase(), k -> new HashSet<>())
+                .add(key));
     }
 
     boolean keyIsIncluded(String key, JsonNode node) {

@@ -7,7 +7,7 @@ import java.util.List;
 import dev.ebullient.convert.qute.NamedText;
 import dev.ebullient.convert.qute.QuteUtil;
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2eSources;
+import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
 import io.quarkus.qute.TemplateData;
 
 /**
@@ -56,11 +56,11 @@ public class QuteSpell extends Pf2eQuteBase {
     /** Heightened spell effects as a list of {@link dev.ebullient.convert.qute.NamedText NamedText} */
     public final Collection<NamedText> heightened;
 
-    public QuteSpell(Pf2eSources sources, List<String> text, Tags tags,
-            String level, String spellType, Collection<String> traits, List<String> aliases,
-            QuteSpellCasting casting, QuteSpellTarget targeting, QuteSpellSaveDuration saveDuration,
-            List<String> domains, List<String> traditions, List<String> spellLists,
-            Collection<NamedText> subclass, Collection<NamedText> heightened, QuteSpellAmp amp) {
+    public QuteSpell(Pf2VttSources sources, List<String> text, Tags tags,
+                     String level, String spellType, Collection<String> traits, List<String> aliases,
+                     QuteSpellCasting casting, QuteSpellTarget targeting, QuteSpellSaveDuration saveDuration,
+                     List<String> domains, List<String> traditions, List<String> spellLists,
+                     Collection<NamedText> subclass, Collection<NamedText> heightened, QuteSpellAmp amp) {
         super(sources, text, tags);
 
         this.level = level;
