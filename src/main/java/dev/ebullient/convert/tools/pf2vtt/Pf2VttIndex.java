@@ -1,4 +1,4 @@
-package dev.ebullient.convert.tools.pf2e;
+package dev.ebullient.convert.tools.pf2vtt;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,9 +22,8 @@ import dev.ebullient.convert.io.MarkdownWriter;
 import dev.ebullient.convert.io.Tui;
 import dev.ebullient.convert.tools.MarkdownConverter;
 import dev.ebullient.convert.tools.ToolsIndex;
-import dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttIndexType;
-
-public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
+import dev.ebullient.convert.tools.pf2vtt.*;
+public class Pf2VttIndex implements ToolsIndex, Pf2VttTypeReader {
     static final String CORE_RULES_KEY = "book|book-crb";
     final CompendiumConfig config;
 
@@ -192,7 +191,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
                 // check for / manage copies first (creatures, fluff)
                 node = copier.handleCopy(type, node);
             }
-            dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttSources sources = dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttSources.constructSources(type, node); // pre-construct sources
+            Pf2VttSources sources = Pf2VttSources.constructSources(type, node); // pre-construct sources
 
             if (type == Pf2VttIndexType.feat && keyIsIncluded(key, node)) {
                 createArchetypeReference(key, node, sources);
@@ -208,7 +207,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
             .forEach(e -> filteredIndex.put(e.getKey(), e.getValue()));
     }
 
-    private void createTraitReference(String key, JsonNode node, Pf2VttSources sources) {
+    private void createTraitReference(String key, JsonNode node, dev.ebullient.convert.tools.pf2e.Pf2VttSources sources) {
         // Precreate category mapping for traits
         String name = SourceField.name.getTextOrEmpty(node);
         String traitLink = linkifyTrait(node, name);
@@ -219,7 +218,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
                 .add(traitLink));
     }
 
-    void createArchetypeReference(String key, JsonNode node, Pf2VttSources sources) {
+    void createArchetypeReference(String key, JsonNode node, dev.ebullient.convert.tools.pf2e.Pf2VttSources sources) {
         JsonNode featType = Pf2eFeat.featType.getFrom(node);
         if (featType != null) {
             List<String> archetype = Pf2eFeat.archetype.getListOfStrings(featType, tui());
@@ -250,7 +249,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
         if (CORE_RULES_KEY.equals(key)) { // include core rules unless turned off
             return true;
         }
-        Pf2VttSources sources = Pf2VttSources.findSources(key);
+        dev.ebullient.convert.tools.pf2e.Pf2VttSources sources = dev.ebullient.convert.tools.pf2e.Pf2VttSources.findSources(key);
         if (config.noSources()) {
             return sources.fromDefaultSource();
         }
@@ -267,7 +266,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
     // --------- Node retrieval --------
 
     /** Used for source/page lookup during rendering */
-    public static JsonNode findNode(Pf2VttSources sources) {
+    public static JsonNode findNode(dev.ebullient.convert.tools.pf2e.Pf2VttSources sources) {
         return imported.get(sources.getKey());
     }
 
@@ -358,7 +357,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2eTypeReader {
     }
 
     @Override
-    public Pf2VttSources getSources() {
+    public dev.ebullient.convert.tools.pf2e.Pf2VttSources getSources() {
         return null;
     }
 

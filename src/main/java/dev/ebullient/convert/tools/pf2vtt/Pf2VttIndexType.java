@@ -1,13 +1,11 @@
-package dev.ebullient.convert.tools.pf2vtt.qute;
+package dev.ebullient.convert.tools.pf2vtt;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.ebullient.convert.tools.IndexType;
 import dev.ebullient.convert.tools.JsonNodeReader;
 import dev.ebullient.convert.tools.JsonTextConverter;
-import dev.ebullient.convert.tools.pf2e.*;
-import dev.ebullient.convert.tools.pf2e.Json2QuteAction;
-import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
-import dev.ebullient.convert.tools.pf2e.qute.Pf2eQuteBase;
+import dev.ebullient.convert.tools.pf2e.qute.Pf2VttQuteBase;
+import dev.ebullient.convert.tools.pf2vtt.*;
 
 import java.nio.file.Path;
 import java.util.function.BiConsumer;
@@ -16,7 +14,58 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
-    action;
+
+    ///NEEDS TIDIED UP TO MATCH THE FOUNDRY JSON
+    ability, // B1
+    action,
+    adventure,
+    affliction,
+    ancestry,
+    archetype,
+    background,
+    book,
+    classFeature,
+    classtype("class"),
+    companion,
+    companionAbility,
+    condition,
+    creature, // B1
+    creatureTemplate, // B1
+    curse("affliction"), // GMG
+    data, // data from any source
+    deity,
+    disease("affliction"), // GMG
+    domain,
+    eidolon, // SoM
+    event, // LOTG
+    familiar, // APG
+    familiarAbility,
+    feat,
+    group,
+    hazard,
+    baseitem,
+    item,
+    language,
+    nation, // GMG
+    optfeature, // APG
+    organization, // LOCG
+    place, // GMG
+    plane, // GMG
+    relicGift, // GMG
+    ritual,
+    settlement, // GMG
+    skill,
+    spell,
+    subclassFeature,
+    table,
+    trait,
+    trap,
+    variantrule, // GMG
+    vehicle, // GMG
+    versatileHeritage, // APG
+    syntheticGroup, // for this tool only
+    bookReference // this tool only
+    ;
 
     final String templateName;
 
@@ -40,25 +89,21 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
         .collect(Collectors.joining("|"))
         + ") ([^{}]+?)}");
 
-    public String templateName() {
-        return templateName;
-    }
-
     public boolean isDefaultSource(String source) {
         return defaultSource().sameSource(source);
     }
 
-    public void withArrayFrom(JsonNode node, BiConsumer<Pf2eIndexType, JsonNode> callback) {
+    public void withArrayFrom(JsonNode node, BiConsumer<Pf2VttIndexType, JsonNode> callback) {
         node.withArray(this.nodeName()).forEach(x -> callback.accept(this, x));
     }
 
-    public static Pf2eIndexType fromText(String name) {
+    public static Pf2VttIndexType fromText(String name) {
         return Stream.of(values())
             .filter(x -> x.templateName.equals(name) || x.name().equalsIgnoreCase(name))
             .findFirst().orElse(null);
     }
 
-    public static Pf2eIndexType getTypeFromKey(String key) {
+    public static Pf2VttIndexType getTypeFromKey(String key) {
         String typeKey = key.substring(0, key.indexOf("|"));
         return valueOf(typeKey);
     }
@@ -81,15 +126,15 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
         return String.format("%s|%s|%s", this.name(), name, source).toLowerCase();
     }
 
-    public String getVaultRoot(Pf2eIndex index) {
+    public String getVaultRoot(Pf2VttIndex index) {
         return useCompendiumBase() ? index.compendiumVaultRoot() : index.rulesVaultRoot();
     }
 
-    public Path getFilePath(Pf2eIndex index) {
+    public Path getFilePath(Pf2VttIndex index) {
         return useCompendiumBase() ? index.compendiumFilePath() : index.rulesFilePath();
     }
 
-    public String relativeRepositoryRoot(Pf2eIndex index) {
+    public String relativeRepositoryRoot(Pf2VttIndex index) {
         String root = getVaultRoot(index);
         String relativePath = relativePath();
 
@@ -99,38 +144,38 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
         return root + relativePath;
     }
 
-    public Pf2eQuteBase convertJson2QuteBase(Pf2eIndex index, JsonNode node) {
-        Pf2eIndexType type = this;
+    public Pf2VttQuteBase convertJson2QuteBase(Pf2VttIndex index, JsonNode node) {
+        Pf2VttIndexType type = this;
         switch (this) {
             // Group: Affliction/Curse/Disease
-            case affliction:
-                type = Pf2eIndexType.fromText(JsonTextConverter.SourceField.type.getTextOrDefault(node, "Disease"));
-            case curse:
-            case disease:
-                return new Json2QuteAffliction(index, type, node).build();
-            // Other type
+//            case affliction:
+//                type = Pf2eIndexType.fromText(JsonTextConverter.SourceField.type.getTextOrDefault(node, "Disease"));
+//            case curse:
+//            case disease:
+//                return new Json2QuteAffliction(index, type, node).build();
+//            // Other type
             case action:
                 return new Json2QuteAction(index, node).build();
-            case archetype:
-                return new Json2QuteArchetype(index, node).build();
-            case background:
-                return new Json2QuteBackground(index, node).build();
-            case deity:
-                return new Json2QuteDeity(index, node).build();
-            case feat:
-                return new Json2QuteFeat(index, node).build();
-            case hazard:
-                return new Json2QuteHazard(index, node).build();
-            case item:
-                return new Json2QuteItem(index, node).build();
-            case ritual:
-                return new Json2QuteRitual(index, node).build();
-            case spell:
-                return new Json2QuteSpell(index, node).build();
-            case trait:
-                return new Json2QuteTrait(index, node).build();
-            case creature:
-                return new Json2QuteCreature(index,node).build();
+//            case archetype:
+//                return new Json2QuteArchetype(index, node).build();
+//            case background:
+//                return new Json2QuteBackground(index, node).build();
+//            case deity:
+//                return new Json2QuteDeity(index, node).build();
+//            case feat:
+//                return new Json2QuteFeat(index, node).build();
+//            case hazard:
+//                return new Json2QuteHazard(index, node).build();
+//            case item:
+//                return new Json2QuteItem(index, node).build();
+//            case ritual:
+//                return new Json2QuteRitual(index, node).build();
+//            case spell:
+//                return new Json2QuteSpell(index, node).build();
+//            case trait:
+//                return new Json2QuteTrait(index, node).build();
+//            case creature:
+//                return new Json2QuteCreature(index,node).build();
             default:
                 return null;
         }

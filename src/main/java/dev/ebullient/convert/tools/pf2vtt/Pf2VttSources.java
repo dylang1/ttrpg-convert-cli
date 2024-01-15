@@ -1,18 +1,18 @@
-package dev.ebullient.convert.tools.pf2e;
-
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+package dev.ebullient.convert.tools.pf2vtt;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import dev.ebullient.convert.qute.ImageRef;
 import dev.ebullient.convert.tools.CompendiumSources;
 import dev.ebullient.convert.tools.IndexType;
 import dev.ebullient.convert.tools.JsonTextConverter.SourceField;
 import dev.ebullient.convert.tools.ToolsIndex.TtrpgValue;
+import dev.ebullient.convert.tools.pf2e.Pf2eIndex;
 import io.quarkus.qute.TemplateData;
+
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @TemplateData
 public class Pf2VttSources extends CompendiumSources {
@@ -29,7 +29,7 @@ public class Pf2VttSources extends CompendiumSources {
         return keyToSources.get(key);
     }
 
-    public static Pf2VttSources constructSources(Pf2eIndexType type, JsonNode node) {
+    public static Pf2VttSources constructSources(Pf2VttIndexType type, JsonNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Must pass a JsonNode");
         }
@@ -42,19 +42,19 @@ public class Pf2VttSources extends CompendiumSources {
     }
 
     public static Pf2VttSources constructSyntheticSource(String name) {
-        String key = Pf2eIndexType.syntheticGroup.createKey(name, "mixed");
-        return new Pf2VttSources(Pf2eIndexType.syntheticGroup, key, null);
+        String key = Pf2VttIndexType.syntheticGroup.createKey(name, "mixed");
+        return new Pf2VttSources(Pf2VttIndexType.syntheticGroup, key, null);
     }
 
     public static Pf2VttSources createEmbeddedSource(JsonNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Must pass a JsonNode");
         }
-        String key = Pf2eIndexType.bookReference.createKey(node);
-        return new Pf2VttSources(Pf2eIndexType.bookReference, key, node);
+        String key = Pf2VttIndexType.bookReference.createKey(node);
+        return new Pf2VttSources(Pf2VttIndexType.bookReference, key, node);
     }
 
-    public static Pf2VttSources findOrTemporary(Pf2eIndexType type, JsonNode node) {
+    public static Pf2VttSources findOrTemporary(Pf2VttIndexType type, JsonNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Must pass a JsonNode");
         }
@@ -80,11 +80,11 @@ public class Pf2VttSources extends CompendiumSources {
         return imageRef;
     }
 
-    public static ImageRef buildImageRef(Pf2eIndexType type, Pf2eIndex index, Path sourcePath, String title) {
+    public static ImageRef buildImageRef(Pf2VttIndexType type, Pf2VttIndex index, Path sourcePath, String title) {
         return buildImageRef(type, index, sourcePath, sourcePath, title);
     }
 
-    public static ImageRef buildImageRef(Pf2eIndexType type, Pf2eIndex index, Path sourcePath, Path relativeTarget,
+    public static ImageRef buildImageRef(Pf2VttIndexType type, Pf2VttIndex index, Path sourcePath, Path relativeTarget,
             String title) {
         ImageRef imageRef = new ImageRef.Builder()
                 .setSourcePath(sourcePath)
@@ -101,19 +101,19 @@ public class Pf2VttSources extends CompendiumSources {
         return imageSourceToRef.values();
     }
 
-    final Pf2eIndexType type;
+    final Pf2VttIndexType type;
 
-    private Pf2VttSources(Pf2eIndexType type, String key, JsonNode node) {
+    private Pf2VttSources(Pf2VttIndexType type, String key, JsonNode node) {
         super(type, key, node);
         this.type = type;
     }
 
     public JsonNode findNode() {
-        return Pf2eIndex.findNode(this);
+        return Pf2VttIndex.findNode(this);
     }
 
     protected String findName(IndexType type, JsonNode node) {
-        if (type == Pf2eIndexType.syntheticGroup || type == Pf2eIndexType.bookReference) {
+        if (type == Pf2VttIndexType.syntheticGroup || type == Pf2VttIndexType.bookReference) {
             return this.key.replaceAll(".*\\|(.*)\\|", "$1");
         }
         String name = SourceField.name.getTextOrEmpty(node);
@@ -125,24 +125,24 @@ public class Pf2VttSources extends CompendiumSources {
 
     @Override
     protected String findSourceText(IndexType type, JsonNode jsonElement) {
-        if (type == Pf2eIndexType.syntheticGroup) {
+        if (type == Pf2VttIndexType.syntheticGroup) {
             return this.key.replaceAll(".*\\|([^|]+)$", "$1");
         }
         return super.findSourceText(type, jsonElement);
     }
 
     @Override
-    public Pf2eIndexType getType() {
+    public Pf2VttIndexType getType() {
         return type;
     }
 
     /** Documents that have no primary source (compositions) */
     protected boolean isSynthetic() {
-        return type == Pf2eIndexType.syntheticGroup;
+        return type == Pf2VttIndexType.syntheticGroup;
     }
 
     public boolean fromDefaultSource() {
-        if (type == Pf2eIndexType.data) {
+        if (type == Pf2VttIndexType.data) {
             return true;
         }
         return type.defaultSourceString().equals(primarySource().toLowerCase());
