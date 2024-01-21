@@ -9,6 +9,7 @@ import dev.ebullient.convert.config.TtrpgConfig;
 import dev.ebullient.convert.qute.SourceAndPage;
 import dev.ebullient.convert.tools.dnd5e.Tools5eIndexType;
 import dev.ebullient.convert.tools.pf2e.Pf2eIndexType;
+import dev.ebullient.convert.tools.pf2vtt.Pf2VttIndexType;
 
 public class ParseState {
 
@@ -299,6 +300,14 @@ public class ParseState {
         }
         return current.src;
     }
+    public String getSource(Pf2VttIndexType type) {
+        ParseState.ParseStateInfo current = stack.peek();
+        if (current == null || current.src == null) {
+            return type == null ? null : type.defaultSourceString();
+        }
+        return current.src;
+        }
+
 
     public String getPage() {
         ParseState.ParseStateInfo current = stack.peek();

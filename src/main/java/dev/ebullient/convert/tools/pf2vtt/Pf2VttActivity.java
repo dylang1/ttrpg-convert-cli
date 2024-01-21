@@ -2,8 +2,7 @@ package dev.ebullient.convert.tools.pf2vtt;
 
 import dev.ebullient.convert.io.Tui;
 import dev.ebullient.convert.tools.JsonNodeReader;
-import dev.ebullient.convert.tools.pf2e.JsonSource;
-import dev.ebullient.convert.tools.pf2e.qute.QuteDataActivity;
+import dev.ebullient.convert.tools.pf2vtt.qute.QuteDataActivity;
 
 import java.nio.file.Path;
 
