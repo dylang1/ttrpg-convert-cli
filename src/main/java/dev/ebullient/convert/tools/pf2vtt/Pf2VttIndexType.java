@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import dev.ebullient.convert.tools.IndexType;
 import dev.ebullient.convert.tools.JsonNodeReader;
 import dev.ebullient.convert.tools.JsonTextConverter;
-import dev.ebullient.convert.tools.pf2e.qute.Pf2VttQuteBase;
+import dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttQuteBase;
 import dev.ebullient.convert.tools.pf2vtt.*;
 
 import java.nio.file.Path;

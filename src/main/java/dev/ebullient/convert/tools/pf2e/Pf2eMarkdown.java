@@ -36,7 +36,7 @@ public class Pf2eMarkdown implements MarkdownConverter {
 
     @Override
     public Pf2eMarkdown writeImages() {
-        index.tui().copyImages(Pf2VttSources.getImages(), fallbackPaths);
+        index.tui().copyImages(Pf2eSources.getImages(), fallbackPaths);
         return this;
     }
 

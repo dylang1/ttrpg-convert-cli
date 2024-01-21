@@ -20,7 +20,7 @@ public class JsonSourceCopier implements JsonSource {
         throw new IllegalStateException("Should not call getSources while copying source");
     }
 
-    JsonNode handleCopy(Pf2VttIndex type, JsonNode jsonSource) {
+    JsonNode handleCopy(Pf2VttIndexType type, JsonNode jsonSource) {
         return jsonSource;
     }
 }

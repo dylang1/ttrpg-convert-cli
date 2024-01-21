@@ -191,7 +191,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
                 // check for / manage copies first (creatures, fluff)
                 node = copier.handleCopy(type, node);
             }
-            Pf2VttSources sources = Pf2VttSources.constructSources(type, node); // pre-construct sources
+            Pf2eSources sources = Pf2eSources.constructSources(type, node); // pre-construct sources
 
             if (type == Pf2eIndexType.feat && keyIsIncluded(key, node)) {
                 createArchetypeReference(key, node, sources);
@@ -207,7 +207,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
                 .forEach(e -> filteredIndex.put(e.getKey(), e.getValue()));
     }
 
-    private void createTraitReference(String key, JsonNode node, Pf2VttSources sources) {
+    private void createTraitReference(String key, JsonNode node, Pf2eSources sources) {
         // Precreate category mapping for traits
         String name = SourceField.name.getTextOrEmpty(node);
         String traitLink = linkifyTrait(node, name);
@@ -218,7 +218,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
                         .add(traitLink));
     }
 
-    void createArchetypeReference(String key, JsonNode node, Pf2VttSources sources) {
+    void createArchetypeReference(String key, JsonNode node, Pf2eSources sources) {
         JsonNode featType = Pf2eFeat.featType.getFrom(node);
         if (featType != null) {
             List<String> archetype = Pf2eFeat.archetype.getListOfStrings(featType, tui());
@@ -249,7 +249,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
         if (CORE_RULES_KEY.equals(key)) { // include core rules unless turned off
             return true;
         }
-        Pf2VttSources sources = Pf2VttSources.findSources(key);
+        Pf2eSources sources = Pf2eSources.findSources(key);
         if (config.noSources()) {
             return sources.fromDefaultSource();
         }
@@ -266,7 +266,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
     // --------- Node retrieval --------
 
     /** Used for source/page lookup during rendering */
-    public static JsonNode findNode(Pf2VttSources sources) {
+    public static JsonNode findNode(Pf2eSources sources) {
         return imported.get(sources.getKey());
     }
 
@@ -357,7 +357,7 @@ public class Pf2eIndex implements ToolsIndex, Pf2eTypeReader {
     }
 
     @Override
-    public Pf2VttSources getSources() {
+    public Pf2eSources getSources() {
         return null;
     }
 

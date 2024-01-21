@@ -607,15 +607,18 @@ public interface JsonSource extends JsonTextReplacement {
         List<String> text = new ArrayList<>();
         boolean pushed = parseState().push(data);
         try {
-            QuteDataActivity activity = Pf2VttTypeReader.getQuteActivity(data, Json2QuteItem.Pf2eItem.activity, this);
+//            QuteDataActivity activity = Pf2VttTypeReader.getQuteActivity(data, Json2QuteItem.Pf2eItem.activity, this);
+            QuteDataActivity activity = null;
 
             String title = SourceField.name.getTextOrEmpty(data);
             if (activity != null) {
                 title += " " + activity;
             }
 
-            String category = Json2QuteItem.Pf2eItem.category.getTextOrNull(data);
-            String level = Json2QuteItem.Pf2eItem.level.getTextOrNull(data);
+            String category = "cat";
+//            String category = Json2QuteItem.Pf2eItem.category.getTextOrNull(data);
+//            String level = Json2QuteItem.Pf2eItem.level.getTextOrNull(data);
+            String level = "lvl";
             if (category != null || level != null) {
                 title += String.format(" *%s%s%s*",
                     category == null ? "" : category,

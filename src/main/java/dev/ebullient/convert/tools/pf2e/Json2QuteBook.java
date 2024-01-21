@@ -45,7 +45,7 @@ public class Json2QuteBook extends Json2QuteBase {
             String coverUrl = Pf2eBook.coverUrl.getTextOrEmpty(rootNode);
             if (coverUrl != null) {
                 Path coverPath = Path.of(coverUrl);
-                bookInfo.cover = Pf2VttSources.buildImageRef(Pf2eIndexType.book, index, coverPath, sources.getName());
+                bookInfo.cover = Pf2eSources.buildImageRef(Pf2eIndexType.book, index, coverPath, sources.getName());
             }
 
             // Find coverNode and book sections

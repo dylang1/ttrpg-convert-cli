@@ -1,21 +1,16 @@
-package dev.ebullient.convert.tools.pf2e.qute;
+package dev.ebullient.convert.tools.pf2vtt.qute;
+
+import dev.ebullient.convert.tools.Tags;
+
+
+import dev.ebullient.convert.tools.pf2vtt.Pf2VttSources;
+import io.quarkus.qute.TemplateData;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2eSources;
-import io.quarkus.qute.TemplateData;
-
-/**
- * Pf2eTools Action attributes ({@code action2md.txt})
- * <p>
- * Extension of {@link dev.ebullient.convert.tools.pf2e.qute.Pf2eQuteBase Pf2eQuteBase}
- * </p>
- */
-@TemplateData
-public class QuteAction extends Pf2eQuteBase {
+public class QuteAction extends Pf2VttQuteBase {
 
     /** Trigger for this action */
     public final String trigger;
@@ -31,15 +26,15 @@ public class QuteAction extends Pf2eQuteBase {
     public final String frequency;
     /** The cost of using this action */
     public final String cost;
-    /** Type of action (as {@link dev.ebullient.convert.tools.pf2e.qute.QuteAction.ActionType ActionType}) */
-    public final ActionType actionType;
-    /** Activity/Activation cost (as {@link dev.ebullient.convert.tools.pf2e.qute.QuteDataActivity QuteDataActivity}) */
+    /** Type of action (as {@link QuteAction.ActionType ActionType}) */
+    public final QuteAction.ActionType actionType;
+    /** Activity/Activation cost (as {@link QuteDataActivity QuteDataActivity}) */
     public final QuteDataActivity activity;
 
-    public QuteAction(Pf2eSources sources, List<String> text, Tags tags,
+    public QuteAction(Pf2VttSources sources, List<String> text, Tags tags,
                       String cost, String trigger, List<String> aliases, Collection<String> traits,
                       String prerequisites, String requirements, String frequency,
-                      QuteDataActivity activity, ActionType actionType) {
+                      QuteDataActivity activity, QuteAction.ActionType actionType) {
         super(sources, text, tags);
         this.trigger = trigger;
         this.aliases = aliases;
@@ -97,10 +92,10 @@ public class QuteAction extends Pf2eQuteBase {
         public final List<String> variantrule;
 
         public ActionType(
-                boolean basic, boolean item, String skills,
-                List<String> classType, List<String> subclass, List<String> archetype,
-                List<String> ancestry, List<String> heritage, List<String> versatileHeritage,
-                List<String> variantrule) {
+            boolean basic, boolean item, String skills,
+            List<String> classType, List<String> subclass, List<String> archetype,
+            List<String> ancestry, List<String> heritage, List<String> versatileHeritage,
+            List<String> variantrule) {
             this.basic = basic;
             this.item = item;
             this.skills = skills;

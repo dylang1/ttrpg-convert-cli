@@ -1,4 +1,4 @@
-package dev.ebullient.convert.tools.pf2e.qute;
+package dev.ebullient.convert.tools.pf2vtt.qute;
 
 import java.util.List;
 

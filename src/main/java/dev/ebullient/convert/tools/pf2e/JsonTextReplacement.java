@@ -52,7 +52,7 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
 
     Pf2eIndex index();
 
-    Pf2VttSources getSources();
+    Pf2eSources getSources();
 
     default Tui tui() {
         return cfg().tui();
@@ -419,7 +419,8 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2eIndexType> {
         // method instead.",
         String[] parts = match.split("\\|");
         String className = parts[0];
-        String classSource = String.valueOf(Pf2eIndexType.classtype.defaultSource());
+//        String classSource = String.valueOf(Pf2eIndexType.classtype.defaultSource());
+        String classSource = "";
         String linkText = className;
         String subclass = null;
         if (parts.length > 3) {
