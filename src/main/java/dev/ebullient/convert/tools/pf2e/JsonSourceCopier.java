@@ -15,7 +15,7 @@ public class JsonSourceCopier implements JsonSource {
     }
 
     @Override
-    public Pf2VttSources getSources() {
+    public Pf2eSources getSources() {
         throw new IllegalStateException("Should not call getSources while copying source");
     }
 

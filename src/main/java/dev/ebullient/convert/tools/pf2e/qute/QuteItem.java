@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import dev.ebullient.convert.qute.NamedText;
 import dev.ebullient.convert.qute.QuteUtil;
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
+import dev.ebullient.convert.tools.pf2e.Pf2eSources;
 import io.quarkus.qute.TemplateData;
 
 /**
@@ -66,7 +66,7 @@ public class QuteItem extends Pf2eQuteBase {
     /** Item variants as list of {@link dev.ebullient.convert.tools.pf2e.qute.QuteItem.QuteItemVariant QuteItemVariant} */
     public final List<QuteItemVariant> variants;
 
-    public QuteItem(Pf2VttSources sources, List<String> text, Tags tags,
+    public QuteItem(Pf2eSources sources, List<String> text, Tags tags,
                     Collection<String> traits, List<String> aliases, QuteItemActivate activate,
                     String price, String ammunition, String level, String onset, String access,
                     String duration, String category, String group,

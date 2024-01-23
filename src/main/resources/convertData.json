@@ -625,5 +625,15 @@
         }
       ]
     }
+  },
+  "configPf2Vtt": {
+    "templateKeys": [
+      "action"
+    ],
+    "markerFiles": [
+    ],
+    "sources": [
+      "actions"
+    ]
   }
 }

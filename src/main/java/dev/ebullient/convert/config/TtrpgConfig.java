@@ -168,6 +168,23 @@ public class TtrpgConfig {
                 }
             }
         }
+        if(datasource == Datasource.vttPf2){
+           JsonNode configVttPf2 = ConfigKeys.configPf2Vtt.get(node);
+            if (configVttPf2 != null) {
+                config.abvToName.putAll(ConfigKeys.abvToName.getAsKeyLowerMap(configVttPf2));
+                config.longToAbv.putAll(ConfigKeys.longToAbv.getAsKeyLowerMap(configVttPf2));
+                config.fallbackImagePaths.putAll(ConfigKeys.fallbackImage.getAsMap(configVttPf2));
+                config.markerFiles.addAll(ConfigKeys.markerFiles.getAsList(configVttPf2));
+                config.sources.addAll(ConfigKeys.sources.getAsList(configVttPf2));
+                config.indexes.putAll(ConfigKeys.indexes.getAsKeyLowerMap(configVttPf2));
+                config.templateKeys.addAll(ConfigKeys.templateKeys.getAsList(configVttPf2));
+
+                Map<String, List<Fix>> fixes = ConfigKeys.fixes.getAs(configVttPf2, FIXES);
+                if (fixes != null) {
+                    config.fixes.putAll(fixes);
+                }
+            }
+        }
     }
 
     static class DatasourceConfig {
@@ -225,6 +242,7 @@ public class TtrpgConfig {
         abvToName,
         config5e,
         configPf2e,
+        configPf2Vtt,
         fallbackImage,
         fixes,
         indexes,

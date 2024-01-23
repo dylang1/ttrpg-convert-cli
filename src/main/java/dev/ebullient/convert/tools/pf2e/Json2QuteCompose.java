@@ -14,12 +14,12 @@ import dev.ebullient.convert.tools.pf2e.qute.Pf2eQuteNote;
 
 public class Json2QuteCompose extends Json2QuteBase {
     final List<JsonNode> nodes = new ArrayList<>();
-    Pf2VttSources currentSources;
+    Pf2eSources currentSources;
     final String title;
 
     public Json2QuteCompose(Pf2eIndexType type, Pf2eIndex index, String title) {
         super(index, type, null,
-                Pf2VttSources.constructSyntheticSource(title));
+                Pf2eSources.constructSyntheticSource(title));
         currentSources = super.getSources();
         this.title = title;
     }
@@ -29,7 +29,7 @@ public class Json2QuteCompose extends Json2QuteBase {
     }
 
     @Override
-    public Pf2VttSources getSources() {
+    public Pf2eSources getSources() {
         return currentSources;
     }
 
@@ -55,7 +55,7 @@ public class Json2QuteCompose extends Json2QuteBase {
 
     private void appendElement(JsonNode entry, List<String> text, Tags tags) {
         String key = ToolsIndex.TtrpgValue.indexKey.getFromNode(entry);
-        currentSources = Pf2VttSources.findSources(key);
+        currentSources = Pf2eSources.findSources(key);
         String name = SourceField.name.getTextOrEmpty(entry);
 
         if (index.keyIsIncluded(key, entry)) {
@@ -88,7 +88,7 @@ public class Json2QuteCompose extends Json2QuteBase {
         text.add("**Spells** " + spells.stream()
                 .map(s -> index().getIncludedNode(s))
                 .sorted(Comparator.comparingInt(n -> Pf2eSpell.level.intOrDefault(n, 1)))
-                .map(Pf2VttSources::findSources)
+                .map(Pf2eSources::findSources)
                 .map(s -> linkify(Pf2eIndexType.spell, s.getName() + "|" + s.primarySource()))
                 .collect(Collectors.joining(", ")));
     }

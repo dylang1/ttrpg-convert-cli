@@ -56,7 +56,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2VttTypeReader {
 
         // user configuration
         config.readConfigurationIfPresent(node);
-
+    /// TODO:: THIS NEEDS REWRITTEN AS THE NEW DATA DOESNT FOLLOW THE SAME STRUCTURE :)
         // data ingest. Minimal processing.
 //        Pf2VttIndexType.ability.withArrayFrom(node, this::addToIndex);
         Pf2VttIndexType.action.withArrayFrom(node, this::addToIndex);

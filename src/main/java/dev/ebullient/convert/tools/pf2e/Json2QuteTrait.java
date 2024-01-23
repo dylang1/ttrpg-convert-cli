@@ -48,7 +48,7 @@ public class Json2QuteTrait extends Json2QuteBase {
     }
 
     static Pf2eQuteNote buildIndex(Pf2eIndex index) {
-        Pf2VttSources sources = Pf2VttSources.constructSyntheticSource("Trait Index");
+        Pf2eSources sources = Pf2eSources.constructSyntheticSource("Trait Index");
 
         return new QuteTraitIndex(sources, index.categoryTraitMap());
     }

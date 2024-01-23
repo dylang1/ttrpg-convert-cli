@@ -26,13 +26,13 @@ public class Pf2VttDataConvertTest {
     public static void setupDir(String root) {
         tui = new Tui();
         tui.init(null, false, false);
-        outputPath_pf2 = TestUtils.OUTPUT_ROOT_PF2.resolve(root).resolve("test-cli");
+        outputPath_pf2 = TestUtils.OUTPUT_ROOT_PF2VTT.resolve(root).resolve("test-cli");
         outputPath_pf2.toFile().mkdirs();
     }
 
     @Test
     void testLiveData_Pf2VttAllSources(QuarkusMainLauncher launcher) {
-        if (TestUtils.TOOLS_PATH_PF2E.toFile().exists()) {
+        if (TestUtils.TOOLS_PATH_PF2VTT.toFile().exists()) {
             // All, I mean it. Really for real.. ALL.
             final Path allIndex = outputPath_pf2.resolve("all-index");
             TestUtils.deleteDir(allIndex);
@@ -40,14 +40,14 @@ public class Pf2VttDataConvertTest {
             List<String> args = new ArrayList<>(List.of("--index", "--debug",
                     "-s", "ALL",
                     "-o", allIndex.toString(),
-                    "-g", "pf2e",
-                   TestUtils.TOOLS_PATH_PF2E.toString()));
+                    "-g", "pf2vtt",
+                   TestUtils.TOOLS_PATH_PF2VTT.toString()));
 //            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("adventure"))
 //                    .stream()
 //                    .filter(x -> !x.endsWith("-id.json"))
 //                    .toList());
-            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("book")));
-            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2E.resolve("bestiary")).stream().filter(x-> x.contains("creatures-b2.json")).toList());
+            args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2VTT.resolve("book")));
+            //args.addAll(TestUtils.getFilesFrom(TestUtils.TOOLS_PATH_PF2VTT.resolve("bestiary")).stream().filter(x-> x.contains("creatures-b2.json")).toList());
 
             LaunchResult result = launcher.launch(args.toArray(new String[0]));
             assertThat(result.exitCode())

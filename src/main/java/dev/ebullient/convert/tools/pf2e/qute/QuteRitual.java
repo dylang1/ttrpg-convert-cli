@@ -7,7 +7,7 @@ import java.util.List;
 import dev.ebullient.convert.qute.NamedText;
 import dev.ebullient.convert.qute.QuteUtil;
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
+import dev.ebullient.convert.tools.pf2e.Pf2eSources;
 import dev.ebullient.convert.tools.pf2e.qute.QuteSpell.QuteSpellTarget;
 import io.quarkus.qute.TemplateData;
 
@@ -44,7 +44,7 @@ public class QuteRitual extends Pf2eQuteBase {
     /** Heightened spell effects as a list of {@link dev.ebullient.convert.qute.NamedText Traits} */
     public final Collection<NamedText> heightened;
 
-    public QuteRitual(Pf2VttSources sources, List<String> text, Tags tags,
+    public QuteRitual(Pf2eSources sources, List<String> text, Tags tags,
                       String level, String ritualType, Collection<String> traits, List<String> aliases,
                       QuteRitualCasting casting, QuteRitualChecks checks, QuteSpellTarget targeting,
                       String requirements, String duration, Collection<NamedText> heightened) {

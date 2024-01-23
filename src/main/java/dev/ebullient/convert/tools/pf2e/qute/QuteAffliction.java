@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
+import dev.ebullient.convert.tools.pf2e.Pf2eSources;
 import io.quarkus.qute.TemplateData;
 
 /**
@@ -28,7 +28,7 @@ public class QuteAffliction extends Pf2eQuteBase {
     /** A description of the tempted version of the curse */
     public final String temptedCurse;
 
-    public QuteAffliction(Pf2VttSources sources, List<String> text, Tags tags,
+    public QuteAffliction(Pf2eSources sources, List<String> text, Tags tags,
                           Collection<String> traits, List<String> aliases,
                           String level, String affliction, String temptedCurse) {
         super(sources, text, tags);

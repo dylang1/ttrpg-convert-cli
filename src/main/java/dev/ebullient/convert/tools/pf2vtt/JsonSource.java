@@ -6,7 +6,7 @@ import dev.ebullient.convert.config.TtrpgConfig;
 import dev.ebullient.convert.io.Tui;
 import dev.ebullient.convert.tools.JsonNodeReader;
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.qute.Pf2VttQuteBase;
+import dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttQuteBase;
 import dev.ebullient.convert.tools.pf2vtt.qute.QuteDataActivity;
 import dev.ebullient.convert.tools.pf2vtt.qute.QuteInlineAttack;
 

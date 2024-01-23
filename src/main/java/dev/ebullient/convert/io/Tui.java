@@ -438,7 +438,7 @@ public class Tui {
                 String name = p.getFileName().toString();
                 if (f.isDirectory()) {
                     result &= readDirectory(relative + p.getFileName() + '/', p, callback);
-                } else if ((name.startsWith("fluff") || name.startsWith(basename)) && name.endsWith(".json")) {
+                } else if (name.endsWith(".json")) {
                     result &= readFile(p, TtrpgConfig.getFixes(relative + name), callback);
                 }
             }

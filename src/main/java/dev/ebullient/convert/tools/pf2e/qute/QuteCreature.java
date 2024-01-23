@@ -1,7 +1,7 @@
 package dev.ebullient.convert.tools.pf2e.qute;
 
 import dev.ebullient.convert.tools.Tags;
-import dev.ebullient.convert.tools.pf2e.Pf2VttSources;
+import dev.ebullient.convert.tools.pf2e.Pf2eSources;
 import io.quarkus.qute.TemplateData;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class QuteCreature extends Pf2eQuteBase {
     public final Collection<QuteAbility> botAbilities;
     public final QuteDataDefenses defenses;
 
-    public QuteCreature(Pf2VttSources sources, List<String> text, Tags tags, Collection<String> traits, List<String> aliases, String description, Integer level, Integer perception, Collection<QuteDataSenses> senses, String languages, QuteDataAbilityMods abilityMods, QuteDataSkills skills, Collection<String> items, String speed, Collection<QuteInlineAttack> attacks, Collection<QuteDataSpellcasting> spellcastings, Collection<QuteAbility> topAbilities, Collection<QuteAbility> midAbilities, Collection<QuteAbility> botAbilities, QuteDataDefenses defenses) {
+    public QuteCreature(Pf2eSources sources, List<String> text, Tags tags, Collection<String> traits, List<String> aliases, String description, Integer level, Integer perception, Collection<QuteDataSenses> senses, String languages, QuteDataAbilityMods abilityMods, QuteDataSkills skills, Collection<String> items, String speed, Collection<QuteInlineAttack> attacks, Collection<QuteDataSpellcasting> spellcastings, Collection<QuteAbility> topAbilities, Collection<QuteAbility> midAbilities, Collection<QuteAbility> botAbilities, QuteDataDefenses defenses) {
         super(sources, text, tags);
         this.aliases = aliases;
         this.traits = traits;
