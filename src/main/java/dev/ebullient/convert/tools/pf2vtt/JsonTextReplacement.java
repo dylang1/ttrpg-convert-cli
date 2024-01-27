@@ -39,7 +39,11 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
         title,
         traits,
         unit,
-        add_hash
+        add_hash,
+
+        system,
+        description,
+        value
     }
 
     Pattern asPattern = Pattern.compile("\\{@as ([^}]+)}");

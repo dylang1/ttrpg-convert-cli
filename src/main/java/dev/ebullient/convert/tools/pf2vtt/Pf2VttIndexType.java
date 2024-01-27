@@ -109,13 +109,19 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
     }
 
     public String createKey(JsonNode node) {
-        if (this == book || this == adventure) {
-            String id = JsonTextConverter.SourceField.id.getTextOrEmpty(node);
-            return String.format("%s|%s-%s", this.name(), this.name(), id).toLowerCase();
-        }
-
         String name = JsonTextConverter.SourceField.name.getTextOrEmpty(node);
-        String source = JsonTextConverter.SourceField.source.getTextOrDefault(node, this.defaultSourceString());
+        //TODO: Fix this to use the enum nodes and possibly change title to be an abbrev of the actual book
+        String source = node.get("system").get("publication").get("title").asText(this.defaultSourceString());
+
+//
+//
+//        if (this == book || this == adventure) {
+//            String id = JsonTextConverter.SourceField.id.getTextOrEmpty(node);
+//            return String.format("%s|%s-%s", this.name(), this.name(), id).toLowerCase();
+//        }
+//
+//        String name = JsonTextConverter.SourceField.name.getTextOrEmpty(node);
+//        String source = JsonTextConverter.SourceField.source.getTextOrDefault(node, this.defaultSourceString());
         return String.format("%s|%s|%s", this.name(), name, source).toLowerCase();
     }
 
