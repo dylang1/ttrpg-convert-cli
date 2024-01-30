@@ -13,7 +13,7 @@ public enum Pf2VttActivity implements JsonNodeReader {
     three("Three-Action", ">>>", "three_actions.svg"),
     free("Free Action", "F", "delay.svg"),
     reaction("Reaction", "R", "reaction.svg"),
-    varies("Varies", "V", "load.svg"),
+    passive("Passive", "P", "load.svg"),
     timed("Duration or Frequency", "⏲", "hour-glass.svg");
 
     final static String DOC_PATH = "core-rulebook/chapter-9-playing-the-game.md#Actions";
@@ -51,8 +51,8 @@ public enum Pf2VttActivity implements JsonNodeReader {
                 return free;
             case "reaction":
                 return reaction;
-            case "varies":
-                return varies;
+            case "passive":
+                return passive;
             case "timed":
                 return timed;
         }

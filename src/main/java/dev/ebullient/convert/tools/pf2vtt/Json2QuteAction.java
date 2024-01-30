@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import dev.ebullient.convert.tools.JsonTextConverter;
 import dev.ebullient.convert.tools.Tags;
 import dev.ebullient.convert.tools.pf2vtt.qute.QuteAction;
+import dev.ebullient.convert.tools.pf2vtt.qute.QuteDataActivity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class Json2QuteAction extends Json2QuteBase {
         //TODO: need to parse this tect to pull out the trigger effect and frequency
         //TODO: props just regex between <p> and can remove the fields and the <strong>
         String s = Field.description.getFieldFrom(systemNode,Field.value).asText("");
-
+        Pf2VttTypeReader.getQuteActivity(systemNode, Pf2VttAction.actionType,Pf2VttAction.actions,this);
 //        Json2QuteAction.ActionType actionType = Pf2VttAction.actionType.fieldFromTo(rootNode, Json2QuteAction.ActionType.class, tui());
 
 //        if (actionType == null) {
@@ -46,7 +47,7 @@ public class Json2QuteAction extends Json2QuteBase {
             Pf2VttAction.prerequisites.transformTextFrom(rootNode, ", ", this),
             Field.requirements.replaceTextFrom(rootNode, this),
             getFrequency(rootNode),
-            Pf2VttTypeReader.getQuteActivity(rootNode, Pf2VttAction.activity, this),
+            null,
             null);
     }
 

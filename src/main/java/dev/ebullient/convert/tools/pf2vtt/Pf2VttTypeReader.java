@@ -2,6 +2,7 @@ package dev.ebullient.convert.tools.pf2vtt;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.ebullient.convert.tools.JsonNodeReader;
+import dev.ebullient.convert.tools.pf2e.Pf2eActivity;
 import dev.ebullient.convert.tools.pf2vtt.JsonTextReplacement;
 import dev.ebullient.convert.tools.pf2vtt.qute.QuteDataActivity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -10,10 +11,51 @@ import java.util.Optional;
 
 public interface Pf2VttTypeReader extends JsonSource{
 
-    static QuteDataActivity getQuteActivity(JsonNode source, JsonNodeReader field, JsonSource convert) {
-        Pf2VttTypeReader.NumberUnitEntry jsonActivity = field.fieldFromTo(source, Pf2VttTypeReader.NumberUnitEntry.class, convert.tui());
+    static QuteDataActivity getQuteActivity(JsonNode source, JsonNodeReader actionTypefield,JsonNodeReader actions, JsonSource convert) {
+        QuteDataActivity quteDataActivity;
+        actions.getFieldFrom(source,Field.value);
+        String unit = actionTypefield.getFieldFrom(source,Field.value).asText();
+        Integer number = actions.getFieldFrom(source,Field.value).asInt(0);
+
         return jsonActivity == null ? null : jsonActivity.toQuteActivity(convert);
     }
+    @RegisterForReflection
+    class Frequency{
+    Integer max;
+    String per;
+
+    public String convertToString(Pf2VttTypeReader convert){
+        return convert.getMultiplicitve(max.toString()) + " Per " + per;
+    }
+
+}
+    private QuteDataActivity toQuteActivity(JsonSource convert) {
+        String extra = entry == null || entry.toLowerCase().contains("varies")
+            ? ""
+            : " (" + convert.replaceText(entry) + ")";
+
+        switch (unit) {
+            case "action", "free", "reaction" -> {
+                Pf2eActivity activity = Pf2eActivity.toActivity(unit, number);
+                if (activity == null) {
+                    throw new IllegalArgumentException("What is this? " + String.format("%s, %s, %s", number, unit, entry));
+                }
+                return activity.toQuteActivity(convert,
+                    extra.isBlank() ? null : String.format("%s%s", activity.getLongName(), extra));
+            }
+            case "passive" -> {
+                return Pf2eActivity.passive.toQuteActivity(convert,
+                    extra.isBlank() ? null : String.format("%s%s", Pf2eActivity.passive.getLongName(), extra));
+            }
+            case "day", "minute", "hour", "round" -> {
+                return Pf2eActivity.timed.toQuteActivity(convert,
+                    String.format("%s %s%s", number, unit, extra));
+            }
+            default -> throw new IllegalArgumentException(
+                "What is this? " + String.format("%s, %s, %s", number, unit, entry));
+        }
+    }
+
     default String getOrdinalForm(String level) {
         return switch (level) {
             case "1" -> "1st";
@@ -22,7 +64,14 @@ public interface Pf2VttTypeReader extends JsonSource{
             default -> level + "th";
         };
     }
-
+    private  String getMultiplicitve(String frequency){
+        return switch (frequency){
+            case "1" -> "once";
+            case "2" -> "twice";
+            case "3" -> "thrice";
+            default -> intToString(Integer.parseInt(frequency), false) + " times";
+        };
+    }
     default String getFrequency(JsonNode node) {
         JsonNode frequency = JsonTextReplacement.Field.frequency.getFrom(node);
         if (frequency == null) {
@@ -154,62 +203,6 @@ public interface Pf2VttTypeReader extends JsonSource{
             default -> {
                 int r = abs % 10;
                 return intToString(abs - r, freq) + "-" + intToString(r, freq);
-            }
-        }
-    }
-    @RegisterForReflection
-    class NumberUnitEntry {
-        public Integer number;
-        public String unit;
-        public String entry;
-
-        public String convertToDurationString(Pf2VttTypeReader convert) {
-            if (entry != null) {
-                return convert.replaceText(entry);
-            }
-            Pf2VttActivity activity = Pf2VttActivity.toActivity(unit, number);
-            if (activity != null && activity != Pf2VttActivity.timed) {
-                return activity.linkify(convert.cfg().rulesVaultRoot());
-            }
-            return String.format("%s %s%s", number, unit, number > 1 ? "s" : "");
-        }
-
-        public String convertToRangeString(Pf2VttTypeReader convert) {
-            if (entry != null) {
-                return convert.replaceText(entry);
-            }
-            if ("feet".equals(unit)) {
-                return String.format("%s %s", number, number > 1 ? "foot" : "feet");
-            } else if ("miles".equals(unit)) {
-                return String.format("%s %s", number, number > 1 ? "mile" : "miles");
-            }
-            return unit;
-        }
-
-        private QuteDataActivity toQuteActivity(JsonSource convert) {
-            String extra = entry == null || entry.toLowerCase().contains("varies")
-                ? ""
-                : " (" + convert.replaceText(entry) + ")";
-
-            switch (unit) {
-                case "single", "action", "free", "reaction" -> {
-                    Pf2VttActivity activity = Pf2VttActivity.toActivity(unit, number);
-                    if (activity == null) {
-                        throw new IllegalArgumentException("What is this? " + String.format("%s, %s, %s", number, unit, entry));
-                    }
-                    return activity.toQuteActivity(convert,
-                        extra.isBlank() ? null : String.format("%s%s", activity.getLongName(), extra));
-                }
-                case "varies" -> {
-                    return Pf2VttActivity.varies.toQuteActivity(convert,
-                        extra.isBlank() ? null : String.format("%s%s", Pf2VttActivity.varies.getLongName(), extra));
-                }
-                case "day", "minute", "hour", "round" -> {
-                    return Pf2VttActivity.timed.toQuteActivity(convert,
-                        String.format("%s %s%s", number, unit, extra));
-                }
-                default -> throw new IllegalArgumentException(
-                    "What is this? " + String.format("%s, %s, %s", number, unit, entry));
             }
         }
     }
