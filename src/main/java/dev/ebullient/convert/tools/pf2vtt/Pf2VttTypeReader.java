@@ -16,8 +16,10 @@ public interface Pf2VttTypeReader extends JsonSource{
         actions.getFieldFrom(source,Field.value);
         String unit = actionTypefield.getFieldFrom(source,Field.value).asText();
         Integer number = actions.getFieldFrom(source,Field.value).asInt(0);
-
-        return jsonActivity == null ? null : jsonActivity.toQuteActivity(convert);
+        Field.frequency.fieldFromTo(source,Frequency.class,convert.tui()).convertToString(convert);
+        quteDataActivity.
+return null;
+//        return jsonActivity == null ? null : jsonActivity.toQuteActivity(convert);
     }
     @RegisterForReflection
     class Frequency{
@@ -25,36 +27,36 @@ public interface Pf2VttTypeReader extends JsonSource{
     String per;
 
     public String convertToString(Pf2VttTypeReader convert){
-        return convert.getMultiplicitve(max.toString()) + " Per " + per;
+        return convert.getMultiplicitve(max.toString()) + " per " + per;
     }
 
 }
-    private QuteDataActivity toQuteActivity(JsonSource convert) {
-        String extra = entry == null || entry.toLowerCase().contains("varies")
-            ? ""
-            : " (" + convert.replaceText(entry) + ")";
-
-        switch (unit) {
-            case "action", "free", "reaction" -> {
-                Pf2eActivity activity = Pf2eActivity.toActivity(unit, number);
-                if (activity == null) {
-                    throw new IllegalArgumentException("What is this? " + String.format("%s, %s, %s", number, unit, entry));
-                }
-                return activity.toQuteActivity(convert,
-                    extra.isBlank() ? null : String.format("%s%s", activity.getLongName(), extra));
-            }
-            case "passive" -> {
-                return Pf2eActivity.passive.toQuteActivity(convert,
-                    extra.isBlank() ? null : String.format("%s%s", Pf2eActivity.passive.getLongName(), extra));
-            }
-            case "day", "minute", "hour", "round" -> {
-                return Pf2eActivity.timed.toQuteActivity(convert,
-                    String.format("%s %s%s", number, unit, extra));
-            }
-            default -> throw new IllegalArgumentException(
-                "What is this? " + String.format("%s, %s, %s", number, unit, entry));
-        }
-    }
+//    private QuteDataActivity toQuteActivity(JsonSource convert) {
+//        String extra = entry == null || entry.toLowerCase().contains("varies")
+//            ? ""
+//            : " (" + convert.replaceText(entry) + ")";
+//
+//        switch (unit) {
+//            case "action", "free", "reaction" -> {
+//                Pf2eActivity activity = Pf2eActivity.toActivity(unit, number);
+//                if (activity == null) {
+//                    throw new IllegalArgumentException("What is this? " + String.format("%s, %s, %s", number, unit, entry));
+//                }
+//                return activity.toQuteActivity(convert,
+//                    extra.isBlank() ? null : String.format("%s%s", activity.getLongName(), extra));
+//            }
+//            case "passive" -> {
+//                return Pf2eActivity.passive.toQuteActivity(convert,
+//                    extra.isBlank() ? null : String.format("%s%s", Pf2eActivity.passive.getLongName(), extra));
+//            }
+//            case "day", "minute", "hour", "round" -> {
+//                return Pf2eActivity.timed.toQuteActivity(convert,
+//                    String.format("%s %s%s", number, unit, extra));
+//            }
+//            default -> throw new IllegalArgumentException(
+//                "What is this? " + String.format("%s, %s, %s", number, unit, entry));
+//        }
+//    }
 
     default String getOrdinalForm(String level) {
         return switch (level) {

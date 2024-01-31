@@ -237,7 +237,7 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
                 type = Pf2VttActivity.reaction;
                 break;
             default:
-                type = Pf2VttActivity.varies;
+                type = Pf2VttActivity.passive;
                 break;
         }
         return type.linkify(index().rulesVaultRoot());
