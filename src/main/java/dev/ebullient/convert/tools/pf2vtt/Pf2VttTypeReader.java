@@ -5,59 +5,61 @@ import dev.ebullient.convert.tools.JsonNodeReader;
 import dev.ebullient.convert.tools.pf2e.Pf2eActivity;
 import dev.ebullient.convert.tools.pf2vtt.JsonTextReplacement;
 import dev.ebullient.convert.tools.pf2vtt.qute.QuteDataActivity;
+import dev.ebullient.convert.tools.pf2vtt.qute.QutePublication;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Optional;
 
 public interface Pf2VttTypeReader extends JsonSource{
 
-    static QuteDataActivity getQuteActivity(JsonNode source, JsonNodeReader actionTypefield,JsonNodeReader actions, JsonSource convert) {
-        QuteDataActivity quteDataActivity;
-        actions.getFieldFrom(source,Field.value);
-        String unit = actionTypefield.getFieldFrom(source,Field.value).asText();
-        Integer number = actions.getFieldFrom(source,Field.value).asInt(0);
-        Field.frequency.fieldFromTo(source,Frequency.class,convert.tui()).convertToString(convert);
-        quteDataActivity.
-return null;
-//        return jsonActivity == null ? null : jsonActivity.toQuteActivity(convert);
+    static QuteDataActivity getQuteActivity(JsonNode source, JsonSource convert) {
+        String unit = Pf2VttAction.actionType.getFieldFrom(source,Field.value).asText();
+        Integer number = Pf2VttAction.actions.getFieldFrom(source,Field.value).asInt(0);
+        String text = "" +
+            (Pf2VttAction.description.getFieldFrom(source,Field.value).asText(""));
+        switch (unit) {
+            case "action", "free", "reaction" -> {
+                Pf2VttActivity activity = Pf2VttActivity.toActivity(unit, number);
+                if (activity == null) {
+                    throw new IllegalArgumentException("What is this? " + String.format("%s, %s, %s", number, unit, text));
+                }
+                return activity.toQuteActivity(convert,
+                    text.isBlank() ? null : String.format("%s%s", activity.getLongName(), text));
+            }
+            case "passive" -> {
+                return Pf2VttActivity.passive.toQuteActivity(convert,
+                    text.isBlank() ? null : String.format("%s%s", Pf2VttActivity.passive.getLongName(), text));
+            }
+            case "day", "minute", "hour", "round" -> {
+                return Pf2VttActivity.timed.toQuteActivity(convert,
+                    String.format("%s %s%s", number, unit, text));
+            }
+            default -> throw new IllegalArgumentException(
+                "What is this? " + String.format("%s, %s, %s", number, unit, text));
+        }
+    }
+
+    static QutePublication getPublication(JsonNode source){
+        JsonNode publication = Pf2VttPublication.publication.getFrom(source);
+        return new QutePublication(Pf2VttPublication.license.getTextOrEmpty(publication),
+            Pf2VttPublication.remaster.getTextOrEmpty(publication),
+            Pf2VttPublication.title.getTextOrEmpty(publication));
     }
     @RegisterForReflection
     class Frequency{
     Integer max;
     String per;
 
-    public String convertToString(Pf2VttTypeReader convert){
-        return convert.getMultiplicitve(max.toString()) + " per " + per;
+    public String convertToString(JsonSource convert){
+    return ((Pf2VttTypeReader)convert).getMultiplicitve(max.toString()) + " per " + per;
     }
 
 }
-//    private QuteDataActivity toQuteActivity(JsonSource convert) {
-//        String extra = entry == null || entry.toLowerCase().contains("varies")
-//            ? ""
-//            : " (" + convert.replaceText(entry) + ")";
-//
-//        switch (unit) {
-//            case "action", "free", "reaction" -> {
-//                Pf2eActivity activity = Pf2eActivity.toActivity(unit, number);
-//                if (activity == null) {
-//                    throw new IllegalArgumentException("What is this? " + String.format("%s, %s, %s", number, unit, entry));
-//                }
-//                return activity.toQuteActivity(convert,
-//                    extra.isBlank() ? null : String.format("%s%s", activity.getLongName(), extra));
-//            }
-//            case "passive" -> {
-//                return Pf2eActivity.passive.toQuteActivity(convert,
-//                    extra.isBlank() ? null : String.format("%s%s", Pf2eActivity.passive.getLongName(), extra));
-//            }
-//            case "day", "minute", "hour", "round" -> {
-//                return Pf2eActivity.timed.toQuteActivity(convert,
-//                    String.format("%s %s%s", number, unit, extra));
-//            }
-//            default -> throw new IllegalArgumentException(
-//                "What is this? " + String.format("%s, %s, %s", number, unit, entry));
-//        }
-//    }
 
+default QutePublication getQutePublication(JsonNode source,JsonSource convert){
+
+        return null;
+}
     default String getOrdinalForm(String level) {
         return switch (level) {
             case "1" -> "1st";
@@ -66,7 +68,7 @@ return null;
             default -> level + "th";
         };
     }
-    private  String getMultiplicitve(String frequency){
+    default String getMultiplicitve(String frequency){
         return switch (frequency){
             case "1" -> "once";
             case "2" -> "twice";

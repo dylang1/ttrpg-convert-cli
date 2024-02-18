@@ -7,8 +7,10 @@ import dev.ebullient.convert.io.Tui;
 import dev.ebullient.convert.tools.JsonNodeReader;
 import dev.ebullient.convert.tools.JsonTextConverter;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
@@ -53,6 +55,12 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
     Pattern notePattern = Pattern.compile("\\{@note (\\*|Note:)?\\s?([^}]+)}");
     Pattern quickRefPattern = Pattern.compile("\\{@quickref ([^}]+)}");
 
+    Pattern triggerPattern = Pattern.compile("<strong>Trigger</strong>(.*?)</p>");
+    Pattern prereqPattern = Pattern.compile("<strong>Prerequisite</strong>(.*?)</p>");
+    Pattern freqPattern = Pattern.compile("<strong>Frequency</strong>(.*?)</p>");
+    Pattern costPattern = Pattern.compile("<strong>Cost</strong>(.*?)</p>");
+    Pattern reqPattern = Pattern.compile("<strong>Requirements</strong>(.*?)</p>");
+
     Pf2VttIndex index();
 
     Pf2VttSources getSources();
@@ -79,20 +87,68 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
         return replaceTokens(input, (s, b) -> this._replaceTokenText(s, b));
     }
 
+    default String replaceTokens(String input, BiFunction<String, Boolean, String> tokenResolver) {
+        if (input == null || input.isBlank()) {
+            return input;
+        }
+
+        StringBuilder out = new StringBuilder();
+        ArrayDeque<StringBuilder> stack = new ArrayDeque<>();
+        StringBuilder buffer = new StringBuilder();
+        boolean foundDice = false;
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            //char c2 = i + 1 < input.length() ? input.charAt(i + 1) : NUL;
+
+            switch (c) {
+                case '<':
+                    stack.push(buffer);
+                    buffer = new StringBuilder();
+                    buffer.append(c);
+                    break;
+                case '>':
+                    buffer.append(c);
+
+                    if('/' != buffer.charAt(buffer.length() -2)){
+                        //Skipping here until we find /> for the end of a html tag
+                        break;
+                    }
+                    String replace = tokenResolver.apply(buffer.toString(), stack.size() > 1);
+                    foundDice |= replace.contains("`dice:");
+                    if (stack.isEmpty()) {
+                        tui().warnf("Mismatched braces? Found '>' with an empty stack. Input: %s", input);
+                    } else {
+                        buffer = stack.pop();
+                    }
+                    buffer.append(replace);
+                    break;
+                default:
+                    buffer.append(c);
+                    break;
+            }
+        }
+
+        if (buffer.length() > 0) {
+            out.append(buffer);
+        }
+        return foundDice
+            ? simplifyFormattedDiceText(out.toString())
+            : out.toString();
+    }
+
     default String _replaceTokenText(String input, boolean nested) {
         if (input == null || input.isEmpty()) {
             return input;
         }
-
- // TODO: This whole block needs reviewed as its for replacing stuff in the source text
           try {
-            String result = input
-                .replace("#$prompt_number:title=Enter Alert Level$#", "Alert Level")
-                .replace("#$prompt_number:title=Enter Charisma Modifier$#", "Charisma modifier")
-                .replace("#$prompt_number:title=Enter Lifestyle Modifier$#", "Charisma modifier")
-                .replace("#$prompt_number:title=Enter a Modifier$#", "Modifier")
-                .replace("#$prompt_number:title=Enter a Modifier,default=10$#", "Modifier (default 10)")
-                .replaceAll("#\\$prompt_number.*default=(.*)\\$#", "$1");
+            String result = input;
+//                .replace("#$prompt_number:title=Enter Alert Level$#", "Alert Level")
+//                .replace("#$prompt_number:title=Enter Charisma Modifier$#", "Charisma modifier")
+//                .replace("#$prompt_number:title=Enter Lifestyle Modifier$#", "Charisma modifier")
+//                .replace("#$prompt_number:title=Enter a Modifier$#", "Modifier")
+//                .replace("#$prompt_number:title=Enter a Modifier,default=10$#", "Modifier (default 10)")
+//                .replaceAll("#\\$prompt_number.*default=(.*)\\$#", "$1");
 
             if (parseState().inList() || parseState().inTable()) {
                 result = result.replaceAll("\\{@sup ([^}]+)}", "[^$1]");

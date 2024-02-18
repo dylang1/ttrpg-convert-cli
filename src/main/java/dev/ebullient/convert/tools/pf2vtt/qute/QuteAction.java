@@ -28,9 +28,9 @@ public class QuteAction extends Pf2VttQuteBase {
     public final QuteDataActivity activity;
 
     public QuteAction(Pf2VttSources sources, List<String> text, Tags tags,
-                      String cost, String trigger, List<String> aliases, Collection<String> traits,
+                      String cost, String trigger, Collection<String> traits,
                       String prerequisites, String requirements, String frequency,
-                      QuteDataActivity activity, QuteAction actionType) {
+                      QuteDataActivity activity ,QutePublication publication) {
         super(sources, text, tags);
         this.trigger = trigger;
         this.traits = traits;
@@ -41,6 +41,7 @@ public class QuteAction extends Pf2VttQuteBase {
         this.frequency = frequency;
 
         this.activity = activity;
+        this.publication = publication;
     }
 
 }

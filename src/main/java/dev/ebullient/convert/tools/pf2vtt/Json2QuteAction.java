@@ -2,6 +2,7 @@ package dev.ebullient.convert.tools.pf2vtt;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import dev.ebullient.convert.tools.JsonTextConverter;
 import dev.ebullient.convert.tools.Tags;
 import dev.ebullient.convert.tools.pf2vtt.qute.QuteAction;
@@ -10,6 +11,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Json2QuteAction extends Json2QuteBase {
@@ -24,31 +27,26 @@ public class Json2QuteAction extends Json2QuteBase {
         List<String> text = new ArrayList<>();
         JsonNode systemNode = Field.system.getFrom(rootNode);
         appendToText(text, SourceField.entries.getFrom(rootNode), "##");
-        appendToText(text, Pf2VttAction.info.getFrom(rootNode), null);
-
-        //TODO: need to parse this tect to pull out the trigger effect and frequency
-        //TODO: props just regex between <p> and can remove the fields and the <strong>
-        String s = Field.description.getFieldFrom(systemNode,Field.value).asText("");
-        Pf2VttTypeReader.getQuteActivity(systemNode, Pf2VttAction.actionType,Pf2VttAction.actions,this);
-//        Json2QuteAction.ActionType actionType = Pf2VttAction.actionType.fieldFromTo(rootNode, Json2QuteAction.ActionType.class, tui());
-
-//        if (actionType == null) {
-//            tags.add("action");
-//        } else {
-//            actionType.addTags(this, tags);
-//        }
-
+        if (Field.traits.getFieldFrom(systemNode, Field.value).isArray()) {
+            ArrayNode n = (ArrayNode) Field.traits.getFieldFrom(systemNode, Field.value);
+            for (JsonNode traitNode : n) {
+                String trait = traitNode.asText();
+                tags.add(trait);
+            }
+        }
+        if("Aid".equals(rootNode.get("name").asText())){
+            int x = 1+1;
+        }
         return new QuteAction(
             getSources(), text, tags,
-            Pf2VttAction.cost.transformTextFrom(rootNode, ", ", this),
-            Pf2VttAction.trigger.transformTextFrom(rootNode, ", ", this),
-            Field.alias.replaceTextFromList(rootNode, this),
+            Pf2VttAction.description.parseCost(systemNode),
+            Pf2VttAction.description.parseTrigger(systemNode),
             collectTraitsFrom(rootNode, tags),
-            Pf2VttAction.prerequisites.transformTextFrom(rootNode, ", ", this),
-            Field.requirements.replaceTextFrom(rootNode, this),
+            Pf2VttAction.description.parsePrerequisite(systemNode),
+            Pf2VttAction.description.parseRequirements(systemNode),
             getFrequency(rootNode),
-            null,
-            null);
+            Pf2VttTypeReader.getQuteActivity(systemNode, this),
+            Pf2VttTypeReader.getPublication(systemNode));
     }
 
 //    @RegisterForReflection

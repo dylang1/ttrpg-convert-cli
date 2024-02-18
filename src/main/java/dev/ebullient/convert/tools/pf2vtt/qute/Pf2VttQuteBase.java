@@ -20,6 +20,13 @@ import io.quarkus.qute.TemplateData;
 public class Pf2VttQuteBase extends QuteBase {
 
     protected final Pf2VttIndexType type;
+    public QutePublication publication = null;
+    public Pf2VttQuteBase setPublication(QutePublication publication) {
+        this.publication = publication;
+        return this;
+    }
+
+
 
     public Pf2VttQuteBase(Pf2VttSources sources, List<String> text, Tags tags) {
         this(sources, sources.getName(), sources.getSourceText(), String.join("\n", text), tags);
