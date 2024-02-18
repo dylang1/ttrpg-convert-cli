@@ -15,8 +15,7 @@ public interface Pf2VttTypeReader extends JsonSource{
     static QuteDataActivity getQuteActivity(JsonNode source, JsonSource convert) {
         String unit = Pf2VttAction.actionType.getFieldFrom(source,Field.value).asText();
         Integer number = Pf2VttAction.actions.getFieldFrom(source,Field.value).asInt(0);
-        String text = "" +
-            (Pf2VttAction.description.getFieldFrom(source,Field.value).asText(""));
+        String text = "" + Pf2VttAction.description.replaceTextFromField(source,Field.value,convert);
         switch (unit) {
             case "action", "free", "reaction" -> {
                 Pf2VttActivity activity = Pf2VttActivity.toActivity(unit, number);
