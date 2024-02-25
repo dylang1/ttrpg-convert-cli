@@ -1,3 +1,10 @@
-Move to foundryvtt data 
-pfvtt package and use that as base. 
-probs need all linking from scratch (abilities etc) 
+TRAIT Source is defaulting to crb, needs fixed to pull real source 
+add link to paizo website for the content of the books (ENUM map) 
+
+build linkify regex for @UUID
+
+match @UUID[Compendium.pf2e.conditionitems.Item.Quickened] 
+but ignore effects as those are foundry things 
+@UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Haste]
+
+need to support <ul><li> tags 

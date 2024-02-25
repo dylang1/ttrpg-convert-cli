@@ -55,11 +55,8 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
     Pattern notePattern = Pattern.compile("\\{@note (\\*|Note:)?\\s?([^}]+)}");
     Pattern quickRefPattern = Pattern.compile("\\{@quickref ([^}]+)}");
 
-    Pattern triggerPattern = Pattern.compile("<strong>Trigger</strong>(.*?)</p>");
-    Pattern prereqPattern = Pattern.compile("<strong>Prerequisite</strong>(.*?)</p>");
-    Pattern freqPattern = Pattern.compile("<strong>Frequency</strong>(.*?)</p>");
-    Pattern costPattern = Pattern.compile("<strong>Cost</strong>(.*?)</p>");
-    Pattern reqPattern = Pattern.compile("<strong>Requirements</strong>(.*?)</p>");
+    Pattern paragraphPattern = Pattern.compile("<p>(.*?)</p>",Pattern.DOTALL);
+    Pattern successDegPattern = Pattern.compile("<p><strong>(Critical Success|Success|Failure|Critical Failure)</strong>(.*)</p>");
 
     Pf2VttIndex index();
 
@@ -91,50 +88,48 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
         if (input == null || input.isBlank()) {
             return input;
         }
-
-        StringBuilder out = new StringBuilder();
-        ArrayDeque<StringBuilder> stack = new ArrayDeque<>();
-        StringBuilder buffer = new StringBuilder();
         boolean foundDice = false;
-
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            //char c2 = i + 1 < input.length() ? input.charAt(i + 1) : NUL;
-
-            switch (c) {
-                case '<':
-                    stack.push(buffer);
-                    buffer = new StringBuilder();
-                    buffer.append(c);
-                    break;
-                case '>':
-                    buffer.append(c);
-
-                    if('/' != buffer.charAt(buffer.length() -2)){
-                        //Skipping here until we find /> for the end of a html tag
-                        break;
-                    }
-                    String replace = tokenResolver.apply(buffer.toString(), stack.size() > 1);
-                    foundDice |= replace.contains("`dice:");
-                    if (stack.isEmpty()) {
-                        tui().warnf("Mismatched braces? Found '>' with an empty stack. Input: %s", input);
-                    } else {
-                        buffer = stack.pop();
-                    }
-                    buffer.append(replace);
-                    break;
-                default:
-                    buffer.append(c);
-                    break;
-            }
-        }
-
-        if (buffer.length() > 0) {
-            out.append(buffer);
-        }
+//TODO: REVISIT THIS IF WE HAVE NESTED LINKS ETC but atm most of the parsing logic can exit in the resolver function
+       //TODO: This should be changed to handle the @Damage[1d6[fire]] type stuff
+        //
+//        for (int i = 0; i < input.length(); i++) {
+//            char c = input.charAt(i);
+//            //char c2 = i + 1 < input.length() ? input.charAt(i + 1) : NUL;
+//
+//            switch (c) {
+//                case '<':
+//                    stack.push(buffer);
+//                    buffer = new StringBuilder();
+//                    buffer.append(c);
+//                    break;
+//                case '>':
+//                    buffer.append(c);
+//
+//                    if('/' != buffer.charAt(buffer.length() -2)){
+//                        //Skipping here until we find /> for the end of a html tag
+//                        break;
+//                    }
+//                    String replace = tokenResolver.apply(buffer.toString(), stack.size() > 1);
+//                    foundDice |= replace.contains("`dice:");
+//                    if (stack.isEmpty()) {
+//                        tui().warnf("Mismatched braces? Found '>' with an empty stack. Input: %s", input);
+//                    } else {
+//                        buffer = stack.pop();
+//                    }
+//                    buffer.append(replace);
+//                    break;
+//                default:
+//                    buffer.append(c);
+//                    break;
+//            }
+//        }
+//
+//        if (buffer.length() > 0) {
+//            out.append(buffer);
+//        }
         return foundDice
-            ? simplifyFormattedDiceText(out.toString())
-            : out.toString();
+            ? simplifyFormattedDiceText(input)
+            : tokenResolver.apply(input,false);
     }
 
     default String _replaceTokenText(String input, boolean nested) {
@@ -142,14 +137,18 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
             return input;
         }
           try {
-            String result = input;
-//                .replace("#$prompt_number:title=Enter Alert Level$#", "Alert Level")
-//                .replace("#$prompt_number:title=Enter Charisma Modifier$#", "Charisma modifier")
-//                .replace("#$prompt_number:title=Enter Lifestyle Modifier$#", "Charisma modifier")
-//                .replace("#$prompt_number:title=Enter a Modifier$#", "Modifier")
-//                .replace("#$prompt_number:title=Enter a Modifier,default=10$#", "Modifier (default 10)")
-//                .replaceAll("#\\$prompt_number.*default=(.*)\\$#", "$1");
-
+              //Removing stuff here as we are going to parse them to seperate members on the objects. to allow users more control
+            String result = input
+                .replaceAll("<p><strong>Prerequisite</strong>(.*?)</p>\n","")
+                .replaceAll("<p><strong>Trigger</strong>(.*?)</p>\n","")
+                .replaceAll("<p><strong>Requirements</strong>(.*?)</p>\n","")
+                .replaceAll("<hr\s*/>\n","");
+                if(successDegPattern.matcher(result).groupCount() >1){
+                   result = successDegPattern.matcher(result)
+                       .replaceFirst((match) -> "> [!success-degree] \n"+match.group(0));
+                   result = successDegPattern.matcher(result)
+                       .replaceAll((match)-> "> - **"+match.group(1) + "** " + match.group(2));
+                }
             if (parseState().inList() || parseState().inTable()) {
                 result = result.replaceAll("\\{@sup ([^}]+)}", "[^$1]");
             } else {
@@ -206,38 +205,8 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
                 result = result
                     .replace("{@hitYourSpellAttack}", "the summoner's spell attack modifier")
                     .replaceAll("\\{@link ([^}|]+)\\|([^}]+)}", "$1 ($2)") // this must come first
-                    .replaceAll("\\{@pf2etools ([^}|]+)\\|?[^}]*}", "$1")
-                    .replaceAll("\\{@Pf2eTools ([^}|]+)\\|?[^}]*}", "$1")
-                    // {@footnote directly in text|This is primarily for homebrew purposes, as the official texts (so far) avoid using footnotes},
-                    // {@footnote optional reference information|This is the footnote. References are free text.|Footnote 1, page 20}.",
-                    .replaceAll("\\{@footnote ([^|}]+)\\|([^|}]+)\\|([^}]*)}", "$1 ^[$2, _$3_]")
-                    .replaceAll("\\{@footnote ([^|}]+)\\|([^}]*)}", "$1 ^[$2]")
-                    .replaceAll("\\{@reward ([^|}]+)\\|?[^}]*}", "$1")
-                    .replaceAll("\\{@dc ([^}]+)}", "DC $1")
-                    .replaceAll("\\{@flatDC ([^}]+)}", "$1")
-                    .replaceAll("\\{@d20 ([^}]+?)}", "$1")
-                    .replaceAll("\\{@recharge ([^}]+?)}", "(Recharge $1-6)")
-                    .replaceAll("\\{@recharge}", "(Recharge 6)")
-                    .replaceAll("\\{@(scaledice|scaledamage) [^|]+\\|[^|]+\\|([^|}]+)[^}]*}", "$2")
-                    .replaceAll("\\{@filter ([^|}]+)\\|?[^}]*}", "$1")
-                    .replaceAll("\\{@cult ([^|}]+)\\|([^|}]+)\\|[^|}]*}", "$2")
-                    .replaceAll("\\{@cult ([^|}]+)\\|[^}]*}", "$1")
-                    .replaceAll("\\{@language ([^|}]+)\\|?[^}]*}", "$1")
-                    .replaceAll("\\{@variantrule ([^|}]+)\\|?[^}]*}", "$1")
-                    .replaceAll("\\{@book ([^}|]+)\\|?[^}]*}", "\"$1\"")
-                    .replaceAll("\\{@hit ([^}<]+)}", "+$1")
-                    .replaceAll("\\{@h}", "Hit: ")
-                    .replaceAll("\\{@c ([^}]+?)}", "$1")
-                    .replaceAll("\\{@center ([^}]+?)}", "$1")
-                    .replaceAll("\\{@s ([^}]+?)}", "$1")
-                    .replaceAll("\\{@strike ([^}]+?)}", "$1")
-                    .replaceAll("\\{@n ([^}]+?)}", "$1")
-                    .replaceAll("\\{@b ([^}]+?)}", "**$1**")
-                    .replaceAll("\\{@bold ([^}]+?)}", "**$1**")
-                    .replaceAll("\\{@i ([^}]+?)}", "_$1_")
-                    .replaceAll("\\{@italic ([^}]+)}", "_$1_")
-                    .replaceAll("\\{@indentFirst ([^}]+?)}", "$1")
-                    .replaceAll("\\{@indentSubsequent ([^}]+?)}", "$1");
+                    .replaceAll("<p>(.*)</p>", "$1\n")
+                    .replaceAll("<strong>(.*)</strong>","**$1**");
             } catch (Exception e) {
                 tui().errorf(e, "Unable to parse string from %s: %s", getSources().getKey(), input);
             }
@@ -259,10 +228,18 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
                     return String.join("\n", text);
                 }
             });
+
+              if(result.contains("/>") || result.contains("/ >")){
+                  tui().warnf("Found html tag not converted to markdown: %s",result);
+              }
             return result;
         } catch (IllegalArgumentException e) {
             tui().errorf(e, "Failure replacing text: %s", e.getMessage());
         }
+
+          if(input.contains("/>") || input.contains("/ >")){
+              tui().warnf("Found html tag not converted to markdown: %s",input);
+          }
         return input;
     }
 

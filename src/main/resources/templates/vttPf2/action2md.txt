@@ -9,7 +9,7 @@ tags:
 {/if}
 aliases: ["{resource.name}"]
 ---
-# {resource.name}
+# {resource.name} {#if resource.activity} {resource.activity}{/if}
 {#if resource.traits }{#each resource.traits}{it}  {/each}
 {/if}*Source: {resource.publication.title}*  
 

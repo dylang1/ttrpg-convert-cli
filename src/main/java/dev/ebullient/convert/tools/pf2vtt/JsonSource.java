@@ -23,7 +23,11 @@ public interface JsonSource extends JsonTextReplacement {
      * @return an empty or sorted/linkified list of traits (never null)
      */
     default Set<String> collectTraitsFrom(JsonNode sourceNode, Tags tags) {
-        return Field.traits.getListOfStrings(sourceNode, tui()).stream()
+        JsonNode traitNode= Field.traits.getFrom(sourceNode);
+        if(traitNode.has("rarity")){
+           tags.add("rarity",traitNode.get("rarity").asText());
+        }
+        return Field.value.getListOfStrings(traitNode, tui()).stream()
             .peek(t -> tags.add("trait", t))
             .sorted()
             .map(s -> linkify(Pf2VttIndexType.trait, s))

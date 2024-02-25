@@ -242,7 +242,8 @@ public interface JsonNodeReader {
     }
 
     default String replaceTextFromField(JsonNode node,JsonNodeReader field, JsonTextConverter<?> replacer) {
-        return replacer.replaceText(field.getTextOrEmpty(node));
+        JsonNode n = node.get(this.name());
+        return replacer.replaceText(field.getTextOrEmpty(n));
     }
 
     default List<String> replaceTextFromList(JsonNode node, JsonTextConverter<?> convert) {
