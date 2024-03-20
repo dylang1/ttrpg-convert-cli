@@ -59,7 +59,7 @@ public class Pf2VttIndex implements ToolsIndex, Pf2VttTypeReader {
     /// TODO:: THIS NEEDS REWRITTEN AS THE NEW DATA DOESNT FOLLOW THE SAME STRUCTURE :)
         // data ingest. Minimal processing.
 //        Pf2VttIndexType.ability.withArrayFrom(node, this::addToIndex);
-        System.out.println(Pf2VttIndexType.valueOf(node.get("type").asText()));
+//        System.out.println(Pf2VttIndexType.valueOf(node.get("type").asText()));
         addToIndex(Pf2VttIndexType.valueOf(node.get("type").asText()),node);
 //        Pf2VttIndexType.archetype.withArrayFrom(node, this::addToIndex);
 //        Pf2VttIndexType.background.withArrayFrom(node, this::addToIndex);

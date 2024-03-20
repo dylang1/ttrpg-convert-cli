@@ -8,6 +8,8 @@ import dev.ebullient.convert.tools.pf2vtt.qute.Pf2VttQuteBase;
 import dev.ebullient.convert.tools.pf2vtt.*;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -17,18 +19,18 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
 
     ///NEEDS TIDIED UP TO MATCH THE FOUNDRY JSON
     ability, // B1
-    action,
+    action(List.of("actionspf2e")),
     adventure,
     affliction,
     ancestry,
     archetype,
     background,
     book,
-    classFeature,
+    classFeature(List.of("classfeatures")),
     classtype("class"),
     companion,
     companionAbility,
-    condition,
+    condition(List.of("conditionitems")),
     creature, // B1
     creatureTemplate, // B1
     curse("affliction"), // GMG
@@ -40,11 +42,11 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
     event, // LOTG
     familiar, // APG
     familiarAbility,
-    feat,
+    feat(List.of("feats-srd")),
     group,
     hazard,
     baseitem,
-    item,
+    item(List.of("equipment-srd")),
     language,
     nation, // GMG
     optfeature, // APG
@@ -55,7 +57,7 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
     ritual,
     settlement, // GMG
     skill,
-    spell,
+    spell(List.of("spells-srd")),
     subclassFeature,
     table,
     trait,
@@ -64,17 +66,32 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
     vehicle, // GMG
     versatileHeritage, // APG
     syntheticGroup, // for this tool only
-    bookReference // this tool only
+    bookReference, // this tool only
+    journal(List.of("journals")),
+    ignore(List.of("pf2e-macros","feat-effects","other-effects","equipment-effects"))
     ;
 
     final String templateName;
+    final List<String> links;
+
+
 
     Pf2VttIndexType() {
         this.templateName = this.name();
+        this.links = new ArrayList<>();
     }
 
     Pf2VttIndexType(String templateName) {
         this.templateName = templateName;
+        this.links = new ArrayList<>();
+    }
+    Pf2VttIndexType(String templateName,List<String> links){
+        this.templateName = templateName;
+        this.links = links;
+    }
+    Pf2VttIndexType(List<String> links){
+        this.templateName = this.name();
+        this.links = links;
     }
 
     public String templateName() {
@@ -89,6 +106,9 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
         .collect(Collectors.joining("|"))
         + ") ([^{}]+?)}");
 
+    public static final Pattern linkPattern = Pattern.compile("@UUID\\[(.+?)\\]");
+
+
     public boolean isDefaultSource(String source) {
         return defaultSource().sameSource(source);
     }
@@ -99,7 +119,7 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
 
     public static Pf2VttIndexType fromText(String name) {
         return Stream.of(values())
-            .filter(x -> x.templateName.equals(name) || x.name().equalsIgnoreCase(name))
+            .filter(x -> x.templateName.equals(name) || x.name().equalsIgnoreCase(name) || x.links.contains(name))
             .findFirst().orElse(null);
     }
 
@@ -266,8 +286,13 @@ public enum Pf2VttIndexType implements IndexType, JsonNodeReader {
 //            case organization -> Pf2eSources.DefaultSource.locg;
 //            case event -> Pf2eSources.DefaultSource.lotg;
 //            case eidolon -> Pf2eSources.DefaultSource.som;
-            default -> throw new IllegalStateException("How did we get here? Switch is missing " + this);
+            default -> {
+//                System.out.println("Using default as switch is missing " + this);
+                yield Pf2VttSources.DefaultSource.crb;
+            }
         };
+        //                throw new IllegalStateException("How did we get here? Switch is missing " + this);
+
     }
 
 }

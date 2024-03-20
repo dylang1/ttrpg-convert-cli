@@ -9,6 +9,7 @@ import dev.ebullient.convert.tools.JsonTextConverter;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.regex.MatchResult;
@@ -50,14 +51,17 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
 
     Pattern asPattern = Pattern.compile("\\{@as ([^}]+)}");
     Pattern runeItemPattern = Pattern.compile("\\{@runeItem ([^}]+)}");
-    Pattern dicePattern = Pattern.compile("\\{@(dice|damage) ([^}]+)}");
+    Pattern dicePattern = Pattern.compile("\\[\\[/r.*?\\]\\{(.*?)\\}");
     Pattern chancePattern = Pattern.compile("\\{@chance ([^}]+)}");
     Pattern notePattern = Pattern.compile("\\{@note (\\*|Note:)?\\s?([^}]+)}");
     Pattern quickRefPattern = Pattern.compile("\\{@quickref ([^}]+)}");
 
     Pattern paragraphPattern = Pattern.compile("<p>(.*?)</p>",Pattern.DOTALL);
     Pattern successDegPattern = Pattern.compile("<p><strong>(Critical Success|Success|Failure|Critical Failure)</strong>(.*)</p>");
-
+Pattern linkPattern = Pattern.compile("@UUID\\[(.+?)\\]");
+Pattern spanPattern = Pattern.compile("<span data-pf2-action=\"(.*?)\".*>(.*)</span>");
+Pattern templatePattern = Pattern.compile("@Template\\[type:(\\w+\\b)\\|distance:(\\d+\\b)\\]");
+Pattern damagePattern= Pattern.compile("@Damage\\[(.*?)d(.*?)\\[(.*?)\\]\\]");
     Pf2VttIndex index();
 
     Pf2VttSources getSources();
@@ -69,6 +73,16 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
     default CompendiumConfig cfg() {
         return index().cfg();
     }
+
+//    default String formatDice(String diceRoll) {
+////        int pos = diceRoll.indexOf(";");
+////        if (pos >= 0) {
+////            diceRoll = diceRoll.substring(0, pos);
+////        }
+//        return cfg().alwaysUseDiceRoller() && diceRoll.matches(JsonTextConverter.DICE_FORMULA)
+//            ? "`dice: " + diceRoll + "` (`" + diceRoll + "`)"
+//            : '`' + diceRoll + '`';
+//    }
 
     default String replaceText(JsonNode input) {
         if (input == null) {
@@ -149,45 +163,48 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
                    result = successDegPattern.matcher(result)
                        .replaceAll((match)-> "> - **"+match.group(1) + "** " + match.group(2));
                 }
-            if (parseState().inList() || parseState().inTable()) {
-                result = result.replaceAll("\\{@sup ([^}]+)}", "[^$1]");
-            } else {
-                result = result.replaceAll("\\{@sup ([^}]+)}", "[$1]: ");
-            }
+
+                result = templatePattern.matcher(result).replaceAll(this::replaceTemplate);
+//            if (parseState().inList() || parseState().inTable()) {
+//                result = result.replaceAll("\\{@sup ([^}]+)}", "[^$1]");
+//            } else {
+//                result = result.replaceAll("\\{@sup ([^}]+)}", "[$1]: ");
+//            }
+
+
 
             // TODO: review against Pf2e formatting patterns
-            if (cfg().alwaysUseDiceRoller()) {
-                result = replaceWithDiceRoller(result);
-            }
+//            if (cfg().alwaysUseDiceRoller()) {
+//                result = replaceWithDiceRoller(result);
+//            }
 
-            result = dicePattern.matcher(result)
-                .replaceAll((match) -> {
-                    String[] parts = match.group(2).split("\\|");
-                    if (parts.length > 1) {
-                        return parts[1];
-                    }
-                    return formatDice(parts[0]);
-                });
+              result = dicePattern.matcher(result)
+                  .replaceAll((match) -> formatDice(match.group(1)));
+              result = damagePattern.matcher(result).replaceAll(this::replaceDamage);
 
-            result = chancePattern.matcher(result)
-                .replaceAll((match) -> match.group(1) + "% chance");
+//
+//            result = chancePattern.matcher(result)
+//                .replaceAll((match) -> match.group(1) + "% chance");
+//
+//            result = asPattern.matcher(result)
+//                .replaceAll(this::replaceActionAs);
 
-            result = asPattern.matcher(result)
-                .replaceAll(this::replaceActionAs);
+//            result = quickRefPattern.matcher(result)
+//                .replaceAll((match) -> {
+//                    String[] parts = match.group(1).split("\\|");
+//                    if (parts.length > 4) {
+//                        return parts[4];
+//                    }
+//                    return parts[0];
+//                });
+//
+//            result = runeItemPattern.matcher(result)
+//                .replaceAll(this::linkifyRuneItem);
+//
+//            result = Pf2VttIndexType.matchPattern.matcher(result)
+//                .replaceAll(this::linkify);
 
-            result = quickRefPattern.matcher(result)
-                .replaceAll((match) -> {
-                    String[] parts = match.group(1).split("\\|");
-                    if (parts.length > 4) {
-                        return parts[4];
-                    }
-                    return parts[0];
-                });
-
-            result = runeItemPattern.matcher(result)
-                .replaceAll(this::linkifyRuneItem);
-
-            result = Pf2VttIndexType.matchPattern.matcher(result)
+            result = Pf2VttIndexType.linkPattern.matcher(result)
                 .replaceAll(this::linkify);
 
             // "Style tags; {@bold some text to be bolded} (alternative {@b shorthand}),
@@ -203,17 +220,23 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
 
             try {
                 result = result
-                    .replace("{@hitYourSpellAttack}", "the summoner's spell attack modifier")
-                    .replaceAll("\\{@link ([^}|]+)\\|([^}]+)}", "$1 ($2)") // this must come first
                     .replaceAll("<p>(.*)</p>", "$1\n")
-                    .replaceAll("<strong>(.*)</strong>","**$1**");
+                    .replaceAll("<strong>(.*)</strong>","**$1**")
+                    .replaceAll("<li>(.*)</li>","- $1")
+                    .replaceAll("<ul>","")
+                    .replaceAll("</ul>","")
+                    .replaceAll("<h2.*>(.*)</h2>","## $1");
             } catch (Exception e) {
                 tui().errorf(e, "Unable to parse string from %s: %s", getSources().getKey(), input);
             }
-
+            result = spanPattern.matcher(result)
+                .replaceAll(this::replaceSpan);
+              result = templatePattern.matcher(result)
+                  .replaceAll(this::replaceTemplate);
             // second pass (nested references)
             result = Pf2VttIndexType.matchPattern.matcher(result)
                 .replaceAll(this::linkify);
+
 
             // note pattern often wraps others. Do this one last.
             result = notePattern.matcher(result).replaceAll((match) -> {
@@ -232,19 +255,40 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
               if(result.contains("/>") || result.contains("/ >")){
                   tui().warnf("Found html tag not converted to markdown: %s",result);
               }
+              if(result.contains("@")){
+                  tui().warnf("Found Foundry Tag: %s",result);
+              }
             return result;
         } catch (IllegalArgumentException e) {
             tui().errorf(e, "Failure replacing text: %s", e.getMessage());
         }
 
-          if(input.contains("/>") || input.contains("/ >")){
+          if(input.contains("/>") || input.contains("/ >") || input.contains("<")){
               tui().warnf("Found html tag not converted to markdown: %s",input);
           }
         return input;
     }
 
+    default String replaceSpan(MatchResult match){
+        return String.format("[%s](%s)",match.group(2),match.group(1)
+            .replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase());
+    }
+
+    default String replaceTemplate(MatchResult match){
+        return String.format("%s-foot %s",match.group(2),match.group(1));
+    }
+    default String replaceDamage(MatchResult match){
+        // defaulting to 1 here for cases where theres non digits in the number of dice
+        //ie ceil(@actor.level/2)d8
+        String damage = match.group(1).matches("[0-9]*") ?  match.group(1) : "1";
+        Pattern pattern = Pattern.compile("\\D.*");
+        String diceNo = match.group(2).replaceAll(pattern.pattern(),"");
+//        String diceNo = Pattern.compile("([0-9]*)").matcher(match.group(2))
+//            .replaceAll("$1");
+        return String.format("`%sd%s %s`",damage,diceNo,match.group(3));
+    }
     default String replaceFootnoteReference(MatchResult match) {
-        return String.format("[^%s]%s", match.group(1),
+        return String.format("[^%s]%s", match.group(),
             parseState().inFootnotes() ? ": " : "");
     }
 
@@ -292,17 +336,18 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
     }
 
     default String linkify(MatchResult match) {
-        Pf2VttIndexType targetType = Pf2VttIndexType.fromText(match.group(1));
+        Pf2VttIndexType targetType = Pf2VttIndexType.fromText(match.group(1).split("\\.")[2]);
         if (targetType == null) {
-            throw new IllegalStateException("Unknown type to linkify (how?)" + match.group(0));
+            throw new IllegalStateException("Unknown type to linkify (how?)" + match.group(1));
         }
-        return linkify(targetType, match.group(2));
+        return linkify(targetType, match.group(1));
     }
 
     default String linkify(Pf2VttIndexType targetType, String match) {
         if (match == null || match.isEmpty()) {
             return match;
         }
+        String initLinkTest = match.substring(match.lastIndexOf(".")+1);
         switch (targetType) {
             case skill:
                 // "Skill tags; {@skill Athletics}, {@skill Lore}, {@skill Perception}",
@@ -318,8 +363,14 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
                 return linkifySubClassFeature(match);
             case trait:
                 return linkifyTrait(match);
+            case action:
+
+                return linkifyRules(Pf2VttIndexType.action,initLinkTest,"actions","");
+            case ignore:
+                //Ignoring these ones as they are foundry effects or macros, which dont make sense for us to link to
+                return "";
             default:
-                //tui().debugf("TODO Unsupported Linking found: %s for data %s",targetType.toString(), match);
+                tui().debugf("TODO Unsupported Linking found: %s for data %s",targetType.toString(), match);
                 break;
         }
 
@@ -344,8 +395,8 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
             parts[0] = parts[0].replaceAll("\\s+\\([Aa]pocryphal\\)", "");
             return linkifyRules(Pf2VttIndexType.domain, linkText, "domains", toTitleCase(parts[0]));
         } else if (targetType == Pf2VttIndexType.condition) {
-            return linkifyRules(Pf2VttIndexType.condition, linkText.replaceAll("\\s\\d+$", ""),
-                "conditions", toTitleCase(parts[0].replaceAll("\\s\\d+$", "")));
+            String lT = linkText.substring(linkText.lastIndexOf(".")+1);
+            return linkifyRules(Pf2VttIndexType.condition, lT, "conditions", toTitleCase(lT));
         }
 
         if (parts.length > 1) {
@@ -437,11 +488,10 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
             // skip if already a link
             return text;
         }
-        return String.format("[%s](%s/%s.md#%s)",
+        return String.format("[%s](%s/%s.md)",
             text,
             type.relativeRepositoryRoot(index()),
-            rules,
-            toAnchorTag(anchor));
+            Tui.slugify(text));
     }
 
     default String linkifyClass(String match) {

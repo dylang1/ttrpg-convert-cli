@@ -1,10 +1,34 @@
 TRAIT Source is defaulting to crb, needs fixed to pull real source 
 add link to paizo website for the content of the books (ENUM map) 
 
-build linkify regex for @UUID
 
 match @UUID[Compendium.pf2e.conditionitems.Item.Quickened] 
 but ignore effects as those are foundry things 
 @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Haste]
 
-need to support <ul><li> tags 
+Done for actions, will need to do the other types when we move to them (most work out of the box)
+
+
+-- decide on a structure for things
+[X] need to support <ul><li> tags
+
+<span data-pf2-action="gatherInformation">Diplomacy</span>
+[X] may need to add path though 
+
+-- Breath Weapon 
+
+@Template[type:line|distance:60]
+@Damage[1d6[piercing]]
+[[/r 1d4 #rounds]]{1d4 rounds}.
+[/r ((ceil(@actor.level/2))d6)[piercing]]]{Leveled Damage}
+[X] done damage, 
+
+-[ ] Contact josh on what to do about no rules text stuff from foundry
+- [ ] Parse @Check
+- [ ] Check diceroller config works 
+- [ ] Figure out how to consolidate breath weapons (will help with items) 
+- [ ] Parse other types 
+  - [ ] Conditions
+  - [ ] 
+ 
+Should do conditions next  
