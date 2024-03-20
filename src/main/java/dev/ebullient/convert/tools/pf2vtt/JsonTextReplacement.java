@@ -156,7 +156,7 @@ Pattern damagePattern= Pattern.compile("@Damage\\[(.*?)d(.*?)\\[(.*?)\\]\\]");
                 .replaceAll("<p><strong>Prerequisite</strong>(.*?)</p>\n","")
                 .replaceAll("<p><strong>Trigger</strong>(.*?)</p>\n","")
                 .replaceAll("<p><strong>Requirements</strong>(.*?)</p>\n","")
-                .replaceAll("<hr\s*/>\n","");
+                .replaceAll("<hr\\s*?/>\n","");
                 if(successDegPattern.matcher(result).groupCount() >1){
                    result = successDegPattern.matcher(result)
                        .replaceFirst((match) -> "> [!success-degree] \n"+match.group(0));
@@ -220,12 +220,12 @@ Pattern damagePattern= Pattern.compile("@Damage\\[(.*?)d(.*?)\\[(.*?)\\]\\]");
 
             try {
                 result = result
-                    .replaceAll("<p>(.*)</p>", "$1\n")
-                    .replaceAll("<strong>(.*)</strong>","**$1**")
-                    .replaceAll("<li>(.*)</li>","- $1")
+                    .replaceAll("<p>(.*?)</p>", "$1\n")
+                    .replaceAll("<strong>(.*?)</strong>","**$1**")
+                    .replaceAll("<li>(.*?)</li>","- $1")
                     .replaceAll("<ul>","")
                     .replaceAll("</ul>","")
-                    .replaceAll("<h2.*>(.*)</h2>","## $1");
+                    .replaceAll("<h2.*?>(.*?)</h2>","## $1");
             } catch (Exception e) {
                 tui().errorf(e, "Unable to parse string from %s: %s", getSources().getKey(), input);
             }
