@@ -60,8 +60,9 @@ public interface JsonTextReplacement extends JsonTextConverter<Pf2VttIndexType> 
     Pattern successDegPattern = Pattern.compile("<p><strong>(Critical Success|Success|Failure|Critical Failure)</strong>(.*)</p>");
 Pattern linkPattern = Pattern.compile("@UUID\\[(.+?)\\]");
 Pattern spanPattern = Pattern.compile("<span data-pf2-action=\"(.*?)\".*>(.*)</span>");
-Pattern templatePattern = Pattern.compile("@Template\\[type:(\\w+\\b)\\|distance:(\\d+\\b)\\]");
-Pattern damagePattern= Pattern.compile("@Damage\\[(.*?)d(.*?)\\[(.*?)\\]\\]");
+Pattern templatePattern = Pattern.compile("@Template\\[type:(\\w+\\b)\\|distance:(\\d+\\b)]");
+Pattern damagePattern= Pattern.compile("@Damage\\[(.*?)d(.*?)\\[(.*?)]]");
+Pattern checkPattern = Pattern.compile("@Check\\[(.*?)]");
     Pf2VttIndex index();
 
     Pf2VttSources getSources();
@@ -233,6 +234,8 @@ Pattern damagePattern= Pattern.compile("@Damage\\[(.*?)d(.*?)\\[(.*?)\\]\\]");
                 .replaceAll(this::replaceSpan);
               result = templatePattern.matcher(result)
                   .replaceAll(this::replaceTemplate);
+              result = checkPattern.matcher(result)
+                  .replaceAll(this::replaceCheck);
             // second pass (nested references)
             result = Pf2VttIndexType.matchPattern.matcher(result)
                 .replaceAll(this::linkify);
@@ -268,6 +271,11 @@ Pattern damagePattern= Pattern.compile("@Damage\\[(.*?)d(.*?)\\[(.*?)\\]\\]");
           }
         return input;
     }
+
+    default String replaceCheck(MatchResult matchResult){
+
+        return "";
+    };
 
     default String replaceSpan(MatchResult match){
         return String.format("[%s](%s)",match.group(2),match.group(1)

@@ -23,7 +23,7 @@ Done for actions, will need to do the other types when we move to them (most wor
 [/r ((ceil(@actor.level/2))d6)[piercing]]]{Leveled Damage}
 [X] done damage, 
 
--[ ] Contact josh on what to do about no rules text stuff from foundry
+-[X] Contact josh on what to do about no rules text stuff from foundry
 - [ ] Parse @Check
 - [ ] Check diceroller config works 
 - [ ] Figure out how to consolidate breath weapons (will help with items) 
